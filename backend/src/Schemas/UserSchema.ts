@@ -23,6 +23,7 @@ export const CreateUserSchema = z.object({
       (password) => /[!@#$%^&*]/.test(password),
       "Password must contain one special character"
     ),
+  photo: z.string().optional(),
 });
 
 export const signInSchema = z.object({

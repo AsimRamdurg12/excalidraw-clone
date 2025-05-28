@@ -8,7 +8,7 @@ export const signUp = async (req: Request, res: Response) => {
   try {
     const data = CreateUserSchema.safeParse(req.body);
 
-    const user = await prisma.user.findFirst({
+    const user = await prisma.user.findUnique({
       where: {
         email: data.data?.email,
       },
@@ -28,6 +28,7 @@ export const signUp = async (req: Request, res: Response) => {
         name: data.data?.name!,
         email: data.data?.email!,
         password: hashedPassword,
+        photo: data.data?.photo!,
       },
     });
 
@@ -76,7 +77,7 @@ export const signIn = async (req: Request, res: Response) => {
       return;
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string);
+    const token = jwt.sign(user.id, process.env.JWT_SECRET as string);
 
     res.status(200).json({
       success: true,

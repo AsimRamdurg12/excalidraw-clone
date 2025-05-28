@@ -18,13 +18,14 @@ model User {
   name      String
   email     String   @unique
   password  String
+  photo     String
   createdAt DateTime @default(now())
   rooms     Room[]
   chats     Chat[]
 }
 
 model Room {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   slug      String   @unique
   adminId   String
   createdAt DateTime @default(now())
@@ -33,9 +34,9 @@ model Room {
 }
 
 model Chat {
-  id      String @id @default(uuid())
+  id      Int    @id @default(autoincrement())
   userId  String
-  roomId  String
+  roomId  Int
   message String
   room    Room   @relation(fields: [roomId], references: [id])
   user    User   @relation(fields: [userId], references: [id])

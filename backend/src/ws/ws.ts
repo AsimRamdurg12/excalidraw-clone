@@ -1,4 +1,4 @@
-import { request, Server } from "http";
+import { Server } from "http";
 import { WebSocketServer } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
 

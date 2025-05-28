@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post("/create-room", authMiddleWare, createRoom);
 router.post("/join-room", authMiddleWare, joinRoom);
-router.post("/delete-room", authMiddleWare, deleteRoom);
+router.delete("/delete-room", authMiddleWare, deleteRoom);
 
 export default router;
