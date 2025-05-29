@@ -2,14 +2,14 @@ import express from "express";
 import {
   createRoom,
   deleteRoom,
-  joinRoom,
+  getRoomBySlug,
 } from "../controllers/RoomController";
 import { authMiddleWare } from "../middlewares/AuthMiddleware";
 
 const router = express.Router();
 
 router.post("/create-room", authMiddleWare, createRoom);
-router.post("/join-room", authMiddleWare, joinRoom);
-router.delete("/delete-room", authMiddleWare, deleteRoom);
+router.get("/join-room/:slug", authMiddleWare, getRoomBySlug);
+router.delete("/delete-room/:slug", authMiddleWare, deleteRoom);
 
 export default router;

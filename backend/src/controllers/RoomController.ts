@@ -61,16 +61,10 @@ export const createRoom = async (req: Request, res: Response) => {
   }
 };
 
-export const joinRoom = async (req: Request, res: Response) => {
+export const getRoomBySlug = async (req: Request, res: Response) => {
   try {
     const id = req.id;
-    const data = roomSchema.safeParse(req.body);
-
-    if (!data.success) {
-      res.json({
-        message: data.error,
-      });
-    }
+    const slug = req.params.slug;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -89,7 +83,7 @@ export const joinRoom = async (req: Request, res: Response) => {
     const room = await prisma.room.findFirst({
       where: {
         adminId: id,
-        slug: data.data?.slug,
+        slug: slug,
       },
     });
 
@@ -117,13 +111,7 @@ export const joinRoom = async (req: Request, res: Response) => {
 export const deleteRoom = async (req: Request, res: Response) => {
   try {
     const id = req.id;
-    const data = roomSchema.safeParse(req.body);
-
-    if (!data.success) {
-      res.json({
-        message: data.error,
-      });
-    }
+    const slug = req.params.slug;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -143,7 +131,7 @@ export const deleteRoom = async (req: Request, res: Response) => {
     const room = await prisma.room.findFirst({
       where: {
         adminId: id,
-        slug: data.data?.slug,
+        slug: slug,
       },
     });
 
@@ -157,7 +145,7 @@ export const deleteRoom = async (req: Request, res: Response) => {
 
     await prisma.room.delete({
       where: {
-        adminId: room.adminId,
+        adminId: id,
         slug: room.slug,
       },
     });
