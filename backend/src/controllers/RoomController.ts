@@ -7,6 +7,12 @@ export const createRoom = async (req: Request, res: Response) => {
     const id = req.id;
     const data = roomSchema.safeParse(req.body);
 
+    if (!data.success) {
+      res.json({
+        message: data.error,
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: {
         id: id,
@@ -19,6 +25,19 @@ export const createRoom = async (req: Request, res: Response) => {
         message: "User not authenticated. Please login first",
       });
       return;
+    }
+
+    const existingRoom = await prisma.room.findUnique({
+      where: {
+        slug: data.data?.slug,
+      },
+    });
+
+    if (existingRoom) {
+      res.status(411).json({
+        success: false,
+        message: "Room already exists. Try different room name",
+      });
     }
 
     const room = await prisma.room.create({
@@ -46,6 +65,12 @@ export const joinRoom = async (req: Request, res: Response) => {
   try {
     const id = req.id;
     const data = roomSchema.safeParse(req.body);
+
+    if (!data.success) {
+      res.json({
+        message: data.error,
+      });
+    }
 
     const user = await prisma.user.findUnique({
       where: {
@@ -93,6 +118,12 @@ export const deleteRoom = async (req: Request, res: Response) => {
   try {
     const id = req.id;
     const data = roomSchema.safeParse(req.body);
+
+    if (!data.success) {
+      res.json({
+        message: data.error,
+      });
+    }
 
     const user = await prisma.user.findUnique({
       where: {

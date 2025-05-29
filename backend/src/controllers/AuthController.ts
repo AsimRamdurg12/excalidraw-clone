@@ -8,6 +8,12 @@ export const signUp = async (req: Request, res: Response) => {
   try {
     const data = CreateUserSchema.safeParse(req.body);
 
+    if (!data.success) {
+      res.json({
+        message: data.error,
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: {
         email: data.data?.email,
@@ -49,6 +55,12 @@ export const signUp = async (req: Request, res: Response) => {
 export const signIn = async (req: Request, res: Response) => {
   try {
     const data = signInSchema.safeParse(req.body);
+
+    if (!data.success) {
+      res.json({
+        message: data.error,
+      });
+    }
 
     const user = await prisma.user.findFirst({
       where: {

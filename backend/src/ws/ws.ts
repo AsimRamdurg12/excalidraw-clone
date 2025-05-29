@@ -1,6 +1,15 @@
 import { Server } from "http";
-import { WebSocketServer } from "ws";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { WebSocket, WebSocketServer } from "ws";
+import checkUser from "../utils/utils";
+import { prisma } from "../utils/prisma";
+
+interface User {
+  ws: WebSocket;
+  id: string;
+  rooms: string[];
+}
+
+const users: User[] = [];
 
 const WebSocketSetup = (server: Server) => {
   const wss = new WebSocketServer({ server: server });
@@ -14,22 +23,72 @@ const WebSocketSetup = (server: Server) => {
 
       const queryParams = new URLSearchParams(url.split("?")[1]);
       const token = queryParams.get("token");
-      const decode = jwt.verify(token!, process.env.JWT_SECRET as string);
+      const id = checkUser(token!);
 
-      if (!decode || !(decode as JwtPayload).id) {
+      if (id === null) {
         ws.close();
         return;
       }
 
-      ws.on("message", (data) => {
-        ws.send(data.toString());
+      users.push({
+        id,
+        rooms: [],
+        ws,
       });
+      try {
+        ws.on("message", async (data) => {
+          let parsedData = JSON.parse(data.toString());
+
+          if (parsedData.type === "join-room") {
+            const user = users.find((x) => x.ws === ws);
+            user?.rooms.push(parsedData.roomId);
+          }
+
+          if (parsedData.type === "leave-room") {
+            const user = users.find((x) => x.ws === ws);
+            if (!user) {
+              return;
+            }
+
+            user.rooms = user.rooms.filter((x) => x !== parsedData.roomId);
+          }
+
+          if (parsedData.type === "chat") {
+            const roomId = parsedData.roomId;
+            const message = parsedData.message;
+
+            await prisma.chat.create({
+              data: {
+                roomId: Number(roomId),
+                message,
+                userId: id,
+              },
+            });
+
+            users.forEach((user) => {
+              if (user.rooms.includes(roomId)) {
+                user.ws.send(
+                  JSON.stringify({
+                    type: "chat",
+                    message: message,
+                    roomId,
+                  })
+                );
+              }
+            });
+          }
+        });
+      } catch (error) {
+        console.log(`Error in ws.message: ${error}`);
+        return;
+      }
 
       ws.on("close", () => {
         console.log("Client disconnected");
       });
     } catch (error) {
       console.error("Error parsing data:", error);
+      return;
     }
   });
 };
