@@ -18,6 +18,7 @@ WebSocketSetup(httpServer);
 app.use("/api/auth", AuthRoutes);
 app.use("/api/rooms", RoomRoutes);
 app.use("/api/chats", ChatRoutes);
+app.use("/api/shapes", ChatRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Asim");
