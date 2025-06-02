@@ -22,6 +22,7 @@ export const getShapes = async (req: Request, res: Response) => {
 
     const shapes = await prisma.shapes.findMany({
       where: {
+        userId: userId,
         roomId: room.id,
       },
     });

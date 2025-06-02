@@ -45,10 +45,9 @@ model Chat {
 }
 
 model Shapes {
-  id      Int    @id @default(autoincrement())
-  userId  String
-  roomId  Int
-  message String
-  room    Room   @relation(fields: [roomId], references: [id])
-  shape   Json
+  id     Int    @id @default(autoincrement())
+  userId String
+  roomId Int
+  room   Room   @relation(fields: [roomId], references: [id])
+  shape  Json
 }

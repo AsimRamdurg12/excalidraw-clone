@@ -77,6 +77,31 @@ const WebSocketSetup = (server: Server) => {
               }
             });
           }
+
+          if (parsedData.type === "shapes") {
+            const roomId = parsedData.roomId;
+            const message = parsedData.message;
+
+            await prisma.shapes.create({
+              data: {
+                shape: message,
+                roomId: Number(roomId),
+                userId: id,
+              },
+            });
+
+            users.forEach((user) => {
+              if (user.rooms.includes(roomId)) {
+                user.ws.send(
+                  JSON.stringify({
+                    type: "shapes",
+                    message: message,
+                    roomId,
+                  })
+                );
+              }
+            });
+          }
         });
       } catch (error) {
         console.log(`Error in ws.message: ${error}`);
