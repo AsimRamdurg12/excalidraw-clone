@@ -1,3 +1,5 @@
+import axios from "axios";
+
 type shape =
   | {
       type: "rect";
@@ -23,13 +25,31 @@ type shape =
       endY: number;
     };
 
-export const InitDraw = (canvas: HTMLCanvasElement) => {
+export const InitDraw = async (
+  canvas: HTMLCanvasElement,
+  roomId: string,
+  socket: WebSocket
+) => {
   const ctx = canvas.getContext("2d");
   let clicked = false;
   let startX = 0;
   let startY = 0;
 
-  const existingShapes: shape[] = [];
+  const existingShapes: shape[] = await getExistingShapes(roomId);
+
+  console.log(existingShapes);
+
+  if (!ctx) return;
+
+  socket.onmessage = (event) => {
+    const message = event.data;
+
+    if (message.type === "shapes") {
+      const parsedShapes = JSON.parse(message.message);
+      existingShapes?.push(parsedShapes);
+      clearCanvas(existingShapes, canvas, ctx);
+    }
+  };
 
   canvas.addEventListener("mousedown", (e) => {
     clicked = true;
@@ -44,7 +64,7 @@ export const InitDraw = (canvas: HTMLCanvasElement) => {
 
     const radius = Math.max(width, height) / 2;
 
-    existingShapes.push({
+    const shape: shape = {
       type: "circle",
       x: startX,
       y: startY,
@@ -52,7 +72,17 @@ export const InitDraw = (canvas: HTMLCanvasElement) => {
       startAngle: 0,
       endAngle: 2 * Math.PI,
       counterClockwise: false,
-    });
+    };
+
+    existingShapes?.push(shape);
+
+    socket.send(
+      JSON.stringify({
+        type: "shapes",
+        message: shape,
+        roomId,
+      })
+    );
   });
 
   canvas.addEventListener("mousemove", (e) => {
@@ -76,7 +106,7 @@ function clearCanvas(
   ctx: CanvasRenderingContext2D
 ) {
   ctx?.clearRect(0, 0, canvas.width, canvas.height);
-  existingShapes.map((shape) => {
+  existingShapes?.map((shape) => {
     if (shape.type === "rect") {
       ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
     } else if (shape.type === "circle") {
@@ -96,4 +126,18 @@ function clearCanvas(
   });
 }
 
-function getExistingShapes(roomId: string) {}
+async function getExistingShapes(roomId: string) {
+  try {
+    const response = await axios.get(`/api/shapes/room/${roomId}`);
+    const message = await response.data.message;
+
+    const shapes = message?.map((x: { message: string }) => {
+      const messageData = JSON.parse(x.message);
+      return messageData;
+    });
+
+    return shapes;
+  } catch (error) {
+    console.error(`Error in FE getExistingShapes: ${error}`);
+  }
+}
