@@ -28,28 +28,28 @@ type shape =
 export const InitDraw = async (
   canvas: HTMLCanvasElement,
   roomId: string,
-  socket: WebSocket
+  socket: WebSocket,
+  selectedTool: string
 ) => {
   const ctx = canvas.getContext("2d");
-  let clicked = false;
-  let startX = 0;
-  let startY = 0;
-
-  const existingShapes: shape[] = await getExistingShapes(roomId);
-
-  console.log(existingShapes);
 
   if (!ctx) return;
+  const existingShapes: shape[] = await getExistingShapes(roomId);
 
   socket.onmessage = (event) => {
     const message = event.data;
 
     if (message.type === "shapes") {
       const parsedShapes = JSON.parse(message.message);
-      existingShapes?.push(parsedShapes);
+      existingShapes.push(parsedShapes.shape);
       clearCanvas(existingShapes, canvas, ctx);
     }
   };
+
+  clearCanvas(existingShapes, canvas, ctx);
+  let clicked = false;
+  let startX = 0;
+  let startY = 0;
 
   canvas.addEventListener("mousedown", (e) => {
     clicked = true;
@@ -62,19 +62,22 @@ export const InitDraw = async (
     const width = e.clientX - startX;
     const height = e.clientY - startY;
 
-    const radius = Math.max(width, height) / 2;
+    const radius = Math.abs(Math.max(width, height) / 2);
+
+    const centerX = startX + width / 2;
+    const centerY = startY + height / 2;
 
     const shape: shape = {
       type: "circle",
-      x: startX,
-      y: startY,
+      x: centerX,
+      y: centerY,
       radius: radius,
       startAngle: 0,
       endAngle: 2 * Math.PI,
       counterClockwise: false,
     };
 
-    existingShapes?.push(shape);
+    existingShapes.push(shape);
 
     socket.send(
       JSON.stringify({
@@ -89,11 +92,14 @@ export const InitDraw = async (
     if (clicked) {
       const width = e.clientX - startX;
       const height = e.clientY - startY;
-      const radius = Math.max(width, height) / 2;
+      const radius = Math.abs(Math.max(width, height) / 2);
 
-      clearCanvas(existingShapes, canvas, ctx!);
+      const centerX = startX + width / 2;
+      const centerY = startY + height / 2;
+
+      clearCanvas(existingShapes, canvas, ctx);
       ctx?.beginPath();
-      ctx?.arc(startX, startY, radius, 0, 2 * Math.PI, false);
+      ctx?.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
       ctx?.stroke();
       ctx?.closePath();
     }
@@ -105,8 +111,8 @@ function clearCanvas(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D
 ) {
-  ctx?.clearRect(0, 0, canvas.width, canvas.height);
-  existingShapes?.map((shape) => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  existingShapes.map((shape) => {
     if (shape.type === "rect") {
       ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
     } else if (shape.type === "circle") {
@@ -120,6 +126,7 @@ function clearCanvas(
         shape.counterClockwise
       );
       ctx.stroke();
+      ctx.closePath();
     } else {
       ctx.strokeRect(shape.startX, shape.startY, shape.endX, shape.endY);
     }
@@ -128,13 +135,18 @@ function clearCanvas(
 
 async function getExistingShapes(roomId: string) {
   try {
-    const response = await axios.get(`/api/shapes/room/${roomId}`);
+    const response = await axios.get(
+      `http://localhost:3001/api/shapes/room/${roomId}`
+    );
     const message = await response.data.message;
 
-    const shapes = message?.map((x: { message: string }) => {
-      const messageData = JSON.parse(x.message);
+    const shapes = message.map((x: { shape: string }) => {
+      const messageData = JSON.parse(JSON.stringify(x.shape));
+
       return messageData;
     });
+
+    console.log(shapes);
 
     return shapes;
   } catch (error) {

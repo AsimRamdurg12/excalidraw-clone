@@ -21,7 +21,12 @@ export const useSocket = (roomId: string) => {
 
     return () => {
       ws.onclose = () => {
-        console.log("Disconnected");
+        const data = JSON.stringify({
+          type: "join-room",
+          roomId,
+        });
+
+        ws.send(data);
       };
     };
   }, [roomId]);
