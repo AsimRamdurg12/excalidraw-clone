@@ -4,6 +4,6 @@ import { getShapes } from "../controllers/ShapesController";
 
 const router = express.Router();
 
-router.get("/room/:roomId", authMiddleWare, getShapes);
+router.get("/room/:roomId", getShapes);
 
 export default router;
