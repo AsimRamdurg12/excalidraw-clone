@@ -20,10 +20,20 @@ type Shape =
     }
   | {
       type: "pencil";
-      startX: number;
-      startY: number;
-      endX: number;
-      endY: number;
+      points: { x: number; y: number }[];
+    }
+  | {
+      type: "move";
+      shape: Shape;
+      offsetX: number;
+      offsetY: number;
+    }
+  | {
+      type: "eraser";
+      x: number;
+      y: number;
+      width: number;
+      height: number;
     };
 
 export class Game {
@@ -34,6 +44,7 @@ export class Game {
   private clicked: boolean;
   private startX = 0;
   private startY = 0;
+  private currentPencilStroke: { x: number; y: number }[] = [];
   private selectedTool: Tool = "circle";
   private socket: WebSocket;
 
@@ -61,7 +72,6 @@ export class Game {
 
   async init() {
     this.existingShapes = await getExistingShapes(this.roomId);
-    console.log(this.existingShapes);
     this.clearCanvas();
   }
 
@@ -93,6 +103,12 @@ export class Game {
           shape.endAngle,
           shape.counterClockwise
         );
+        this.ctx.stroke();
+        this.ctx.closePath();
+      } else if (shape.type === "pencil" && shape.points) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
+        shape.points.forEach((point) => this.ctx.lineTo(point.x, point.y));
         this.ctx.stroke();
         this.ctx.closePath();
       }
@@ -133,13 +149,13 @@ export class Game {
         endAngle: 2 * Math.PI,
         counterClockwise: false,
       };
-    } else {
+    } else if (
+      selectedTool === "pencil" &&
+      this.currentPencilStroke.length > 1
+    ) {
       shape = {
         type: "pencil",
-        startX: this.startX,
-        startY: this.startY,
-        endX: this.startX - this.canvas.offsetLeft,
-        endY: this.startY - this.canvas.offsetTop,
+        points: this.currentPencilStroke,
       };
     }
 
@@ -160,6 +176,8 @@ export class Game {
     if (this.clicked) {
       const width = e.clientX - this.startX;
       const height = e.clientY - this.startY;
+      const x = e.clientX;
+      const y = e.clientY;
 
       this.clearCanvas();
 
@@ -175,11 +193,18 @@ export class Game {
         this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
         this.ctx.stroke();
         this.ctx.closePath();
-      } else {
-        const x = this.startX - this.canvas.offsetLeft;
-        const y = this.startY - this.canvas.offsetTop;
-        this.ctx.lineTo(x, y);
+      } else if (selectedTool === "pencil") {
+        this.currentPencilStroke.push({ x, y });
+        this.ctx.beginPath();
+        this.ctx.moveTo(
+          this.currentPencilStroke[0].x,
+          this.currentPencilStroke[0].y
+        );
+        this.currentPencilStroke.forEach((point) =>
+          this.ctx.lineTo(point.x, point.y)
+        );
         this.ctx.stroke();
+        this.ctx.closePath();
       }
     }
   };
