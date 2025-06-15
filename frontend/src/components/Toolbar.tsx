@@ -3,6 +3,7 @@ import IconButton from "../ui/IconButton";
 import { FaRegCircle } from "react-icons/fa";
 import { LuRectangleHorizontal } from "react-icons/lu";
 import type { Tool } from "./Canvas";
+import { HiHandRaised } from "react-icons/hi2";
 
 const Toolbar = ({
   selectedTool,
@@ -28,6 +29,11 @@ const Toolbar = ({
           setSelectedTool={() => setSelectedTool("pencil")}
           active={selectedTool === "pencil"}
           icon={<BiPencil />}
+        />
+        <IconButton
+          setSelectedTool={() => setSelectedTool("move")}
+          active={selectedTool === "move"}
+          icon={<HiHandRaised />}
         />
       </div>
     </div>

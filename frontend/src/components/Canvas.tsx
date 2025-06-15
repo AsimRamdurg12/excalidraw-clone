@@ -3,7 +3,7 @@ import { useSocket } from "../hooks/useSocket";
 import Toolbar from "./Toolbar";
 import { Game } from "../draw/Game";
 
-export type Tool = "pencil" | "rect" | "circle";
+export type Tool = "pencil" | "rect" | "circle" | "move" | "eraser";
 
 const Canvas = ({ roomId }: { roomId: string }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
