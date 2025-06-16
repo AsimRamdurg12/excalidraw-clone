@@ -1,6 +1,13 @@
 import type { Tool } from "../components/Canvas";
 import { getExistingShapes } from "./http";
 
+type AllShapes = {
+  id?: number;
+  roomId?: number;
+  userId?: string;
+  shape: Shape;
+};
+
 type Shape =
   | {
       type: "rect";
@@ -39,15 +46,15 @@ type Shape =
 export class Game {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private existingShapes: Shape[];
+  private existingShapes: AllShapes[];
   private roomId: string;
   private clicked: boolean;
   private startX = 0;
   private startY = 0;
   private currentPencilStroke: { x: number; y: number }[] = [];
-  private activeShape: Shape | null = null;
   private selectedTool: Tool = "circle";
   private socket: WebSocket;
+  private activeShape: AllShapes | null = null;
 
   constructor(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket) {
     this.canvas = canvas;
@@ -55,6 +62,7 @@ export class Game {
     this.existingShapes = [];
     this.roomId = roomId;
     this.socket = socket;
+
     this.clicked = false;
     this.init();
     this.initHandlers();
@@ -82,67 +90,106 @@ export class Game {
 
       if (message.type === "shapes") {
         const parsedShapes = message.message;
-        this.existingShapes.push(parsedShapes.shape);
+        this.existingShapes.push(parsedShapes);
+
         this.clearCanvas();
       }
     };
   }
 
+  drawShape(shape: Shape) {
+    if (shape.type === "rect") {
+      this.ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+    } else if (shape.type === "circle") {
+      this.ctx.beginPath();
+      this.ctx.arc(
+        shape.x,
+        shape.y,
+        shape.radius,
+        shape.startAngle,
+        shape.endAngle,
+        shape.counterClockwise
+      );
+      this.ctx.stroke();
+      this.ctx.closePath();
+    } else if (shape.type === "pencil") {
+      this.ctx.beginPath();
+      this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
+      shape.points.forEach((point) => this.ctx.lineTo(point.x, point.y));
+      this.ctx.stroke();
+      this.ctx.closePath();
+    }
+  }
+
   clearCanvas() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.existingShapes.map((shape) => {
-      if (shape.type === "rect") {
-        this.ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
-      } else if (shape.type === "circle") {
+    this.existingShapes.forEach((shape) => {
+      if (shape.shape.type === "rect") {
+        this.ctx.strokeRect(
+          shape.shape.x,
+          shape.shape.y,
+          shape.shape.width,
+          shape.shape.height
+        );
+      } else if (shape.shape.type === "circle") {
         this.ctx.beginPath();
         this.ctx.arc(
-          shape.x,
-          shape.y,
-          shape.radius,
-          shape.startAngle,
-          shape.endAngle,
-          shape.counterClockwise
+          shape.shape.x,
+          shape.shape.y,
+          shape.shape.radius,
+          shape.shape.startAngle,
+          shape.shape.endAngle,
+          shape.shape.counterClockwise
         );
         this.ctx.stroke();
         this.ctx.closePath();
-      } else if (shape.type === "pencil" && shape.points) {
+      } else if (shape.shape.type === "pencil") {
         this.ctx.beginPath();
-        this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
-        shape.points.forEach((point) => this.ctx.lineTo(point.x, point.y));
+        this.ctx.moveTo(shape.shape.points[0].x, shape.shape.points[0].y);
+        shape.shape.points.forEach((point) =>
+          this.ctx.lineTo(point.x, point.y)
+        );
         this.ctx.stroke();
         this.ctx.closePath();
       }
     });
   }
 
-  mouseInShape(movedshape: Shape & { type: "move" }): Shape {
-    const { offsetX, offsetY, shape } = movedshape;
+  getMovedShape(movedshape: AllShapes): AllShapes | null {
+    if (movedshape?.shape.type !== "move") return null;
+    const { offsetX, offsetY, shape } = movedshape.shape;
 
-    switch (shape.type) {
-      case "rect":
-        return {
-          ...shape,
-          x: shape.x + offsetX,
-          y: shape.y + offsetY,
-        };
-      case "circle":
-        return {
-          ...shape,
-          x: shape.x + offsetX,
-          y: shape.y + offsetY,
-        };
-      case "pencil":
-        return {
-          ...shape,
-          points: shape.points.map((point) => ({
-            x: point.x + offsetX,
-            y: point.y + offsetY,
-          })),
-        };
-      default:
-        return shape;
+    let updatedShape: Shape;
+
+    if (shape.type === "rect") {
+      updatedShape = {
+        ...shape,
+        x: shape.x + offsetX,
+        y: shape.y + offsetY,
+      };
+    } else if (shape.type === "circle") {
+      updatedShape = {
+        ...shape,
+        x: shape.x + offsetX,
+        y: shape.y + offsetY,
+      };
+    } else if (shape.type === "pencil") {
+      updatedShape = {
+        ...shape,
+        points: shape.points.map((point) => ({
+          x: point.x + offsetX,
+          y: point.y + offsetY,
+        })),
+      };
+    } else {
+      return null;
     }
+
+    return {
+      ...movedshape,
+      shape: updatedShape,
+    };
   }
 
   mouseDownHandler = (e: MouseEvent) => {
@@ -150,43 +197,50 @@ export class Game {
     this.startX = e.clientX;
     this.startY = e.clientY;
 
+    if (this.selectedTool === "pencil") {
+      this.currentPencilStroke = [{ x: this.startX, y: this.startY }];
+    }
+
     if (this.selectedTool === "move") {
-      const shapeToMove = this.existingShapes.reverse().find((shape) => {
-        if (shape.type === "rect") {
+      const shapeToMove = this.existingShapes.find((shape) => {
+        if (shape?.shape.type === "rect") {
           return (
-            this.startX >= shape.x &&
-            this.startX <= shape.x + shape.width &&
-            this.startY >= shape.y &&
-            this.startY <= shape.y + shape.height
+            this.startX >= shape?.shape.x &&
+            this.startX <= shape?.shape.x + shape?.shape.width &&
+            this.startY >= shape?.shape.y &&
+            this.startY <= shape?.shape.y + shape?.shape.height
           );
-        } else if (shape.type === "circle") {
+        } else if (shape?.shape.type === "circle") {
           return (
-            Math.hypot(this.startX - shape.x, this.startY - shape.y) <=
-            shape.radius
+            Math.hypot(
+              this.startX - shape?.shape.x,
+              this.startY - shape?.shape.y
+            ) <= shape?.shape.radius
           );
-        } else if (shape.type === "pencil") {
-          return shape.points.some(
+        } else if (shape?.shape.type === "pencil") {
+          return shape?.shape.points.some(
             (point) =>
               Math.hypot(this.startX - point.x, this.startY - point.y) <= 10
           );
         }
+
         return false;
       });
 
       if (shapeToMove) {
         this.existingShapes = this.existingShapes.filter(
-          (shape) => shape != shapeToMove
+          (shape) => shape?.id !== shapeToMove?.id
         );
-        const moveShape = {
-          type: "move" as const,
-          shape: shapeToMove,
-          offsetX: 0,
-          offsetY: 0,
-        };
 
-        this.activeShape = moveShape;
-        this.existingShapes.push(moveShape);
-        this.clearCanvas();
+        this.activeShape = {
+          ...shapeToMove,
+          shape: {
+            type: "move",
+            shape: shapeToMove.shape,
+            offsetX: 0,
+            offsetY: 0,
+          },
+        };
       }
     }
   };
@@ -228,32 +282,30 @@ export class Game {
         points: this.currentPencilStroke,
       };
     } else if (selectedTool === "move") {
-      const moveShape = this.activeShape as Shape & { type: "move" };
-      const finalShape = this.mouseInShape(moveShape);
+      const moveShape = this.activeShape;
+      if (!moveShape || moveShape.shape.type !== "move") return;
+      const finalShape = this.getMovedShape(moveShape);
 
-      this.existingShapes = this.existingShapes.filter(
-        (shape) => shape !== moveShape
+      if (!finalShape) return;
+
+      this.socket.send(
+        JSON.stringify({
+          type: "update",
+          message: finalShape,
+          roomId: this.roomId,
+        })
       );
-      this.existingShapes.push(finalShape);
 
-      // this.socket.send(
-      //   JSON.stringify({
-      //     type: "shapes",
-      //     message: JSON.stringify({
-      //       type: "update",
-      //       shapes: this.existingShapes,
-      //     }),
-      //     roomId: this.roomId,
-      //   })
-      // );
+      this.existingShapes.push({
+        ...finalShape,
+        shape: finalShape.shape,
+      });
       this.activeShape = null;
+
       this.clearCanvas();
-      return;
     }
 
     if (!shape) return;
-
-    this.existingShapes.push(shape);
 
     this.socket.send(
       JSON.stringify({
@@ -262,6 +314,12 @@ export class Game {
         roomId: this.roomId,
       })
     );
+
+    this.existingShapes.push({
+      shape: shape,
+    });
+
+    this.clearCanvas();
   };
 
   mouseMoveHandler = (e: MouseEvent) => {
@@ -298,11 +356,15 @@ export class Game {
         this.ctx.stroke();
         this.ctx.closePath();
       } else if (selectedTool === "move" && this.activeShape) {
-        this.clearCanvas();
-        const moveShape = this.activeShape as Shape & { type: "move" };
-        moveShape.offsetX = x - this.startX;
-        moveShape.offsetY = y - this.startY;
-        this.clearCanvas();
+        if (this.activeShape?.shape.type === "move") {
+          this.activeShape.shape.offsetX = x - this.startX;
+          this.activeShape.shape.offsetY = y - this.startY;
+
+          const movedShape = this.getMovedShape(this.activeShape);
+          if (movedShape) {
+            this.drawShape(movedShape.shape);
+          }
+        }
       }
     }
   };
