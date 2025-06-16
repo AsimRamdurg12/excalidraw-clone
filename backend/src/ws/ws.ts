@@ -82,7 +82,7 @@ const WebSocketSetup = (server: Server) => {
             const roomId = parsedData.roomId;
             const message = parsedData.message;
 
-            await prisma.shapes.create({
+            const shapeMessage = await prisma.shapes.create({
               data: {
                 shape: message,
                 roomId: Number(roomId),
@@ -95,6 +95,33 @@ const WebSocketSetup = (server: Server) => {
                 user.ws.send(
                   JSON.stringify({
                     type: "shapes",
+                    message: shapeMessage,
+                    roomId,
+                  })
+                );
+              }
+            });
+          }
+
+          if (parsedData.type === "update") {
+            const roomId = parsedData.roomId;
+            const shapeId = parsedData.message.id;
+            const message = parsedData.message;
+
+            await prisma.shapes.update({
+              where: {
+                id: shapeId,
+              },
+              data: {
+                shape: message.shape,
+              },
+            });
+
+            users.forEach((user) => {
+              if (user.rooms.includes(roomId)) {
+                user.ws.send(
+                  JSON.stringify({
+                    type: "update",
                     message: message,
                     roomId,
                   })
