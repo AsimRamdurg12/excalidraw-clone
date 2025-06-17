@@ -1,4 +1,4 @@
-import type { Tool } from "../components/Canvas";
+import type { Tool } from "../components/Canvas/Canvas";
 import { getExistingShapes } from "./http";
 
 type AllShapes = {

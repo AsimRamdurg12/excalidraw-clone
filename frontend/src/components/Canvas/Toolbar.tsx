@@ -1,5 +1,5 @@
 import { BiEraser, BiPencil } from "react-icons/bi";
-import IconButton from "../ui/IconButton";
+import IconButton from "../../ui/IconButton";
 import { FaRegCircle } from "react-icons/fa";
 import { LuRectangleHorizontal } from "react-icons/lu";
 import type { Tool } from "./Canvas";
