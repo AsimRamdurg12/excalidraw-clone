@@ -19,7 +19,6 @@ app.use(
 );
 
 const httpServer = createServer(app);
-
 WebSocketSetup(httpServer);
 
 app.use("/api/auth", AuthRoutes);

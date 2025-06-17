@@ -18,7 +18,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  photo     String
+  photo     String?
   createdAt DateTime @default(now())
   rooms     Room[]
   chats     Chat[]
