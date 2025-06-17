@@ -86,7 +86,7 @@ export class Game {
 
   initHandlers() {
     this.socket.onmessage = (event) => {
-      const message = event.data;
+      const message = JSON.parse(event.data);
 
       if (message.type === "shapes") {
         const parsedShapes = message.message;
@@ -126,6 +126,8 @@ export class Game {
 
     this.existingShapes.forEach((shape) => {
       if (shape.shape.type === "rect") {
+        this.ctx.strokeStyle = "#2cd4f2";
+        this.ctx.fillStyle = "blue";
         this.ctx.strokeRect(
           shape.shape.x,
           shape.shape.y,
@@ -133,6 +135,7 @@ export class Game {
           shape.shape.height
         );
       } else if (shape.shape.type === "circle") {
+        this.ctx.strokeStyle = "#873e23";
         this.ctx.beginPath();
         this.ctx.arc(
           shape.shape.x,
@@ -145,6 +148,7 @@ export class Game {
         this.ctx.stroke();
         this.ctx.closePath();
       } else if (shape.shape.type === "pencil") {
+        this.ctx.strokeStyle = "#e28743";
         this.ctx.beginPath();
         this.ctx.moveTo(shape.shape.points[0].x, shape.shape.points[0].y);
         shape.shape.points.forEach((point) =>
@@ -190,6 +194,10 @@ export class Game {
       ...movedshape,
       shape: updatedShape,
     };
+  }
+
+  eraseShape() {
+    this.ctx.globalCompositeOperation = "destination-out";
   }
 
   mouseDownHandler = (e: MouseEvent) => {
@@ -242,6 +250,8 @@ export class Game {
           },
         };
       }
+    } else if (this.selectedTool === "eraser") {
+      this.eraseShape();
     }
   };
 
@@ -314,6 +324,8 @@ export class Game {
         roomId: this.roomId,
       })
     );
+
+    console.log(JSON.stringify(shape));
 
     this.existingShapes.push({
       shape: shape,

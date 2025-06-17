@@ -1,4 +1,4 @@
-import { BiPencil } from "react-icons/bi";
+import { BiEraser, BiPencil } from "react-icons/bi";
 import IconButton from "../ui/IconButton";
 import { FaRegCircle } from "react-icons/fa";
 import { LuRectangleHorizontal } from "react-icons/lu";
@@ -34,6 +34,11 @@ const Toolbar = ({
           setSelectedTool={() => setSelectedTool("move")}
           active={selectedTool === "move"}
           icon={<HiHandRaised />}
+        />
+        <IconButton
+          setSelectedTool={() => setSelectedTool("eraser")}
+          active={selectedTool === "eraser"}
+          icon={<BiEraser />}
         />
       </div>
     </div>
