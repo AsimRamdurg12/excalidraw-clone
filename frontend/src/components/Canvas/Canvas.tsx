@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useSocket } from "../hooks/useSocket";
+import { useSocket } from "../../hooks/useSocket";
 import Toolbar from "./Toolbar";
-import { Game } from "../draw/Game";
+import { Game } from "../../draw/Game";
 
 export type Tool = "pencil" | "rect" | "circle" | "move" | "eraser";
 
