@@ -4,6 +4,8 @@ import Input from "../../ui/Input";
 import PasswordInput from "../../ui/PasswordInput";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "../../ui/Button";
+import { FaUser } from "react-icons/fa";
+import { CgMail } from "react-icons/cg";
 
 const SignUpForm = () => {
   const {
@@ -24,30 +26,41 @@ const SignUpForm = () => {
   };
   return (
     <form
-      className="flex flex-col flex-wrap justify-center items-center bg-white w-fit px-4 py-8 rounded-l-lg gap-2"
+      className="flex flex-col bg-white w-full py-8 gap-2"
       onSubmit={handleSubmit(handleSubmitForm)}
     >
-      <div className="p-4 border rounded-xl shadow bg-gray-100 w-64 animate-pulse">
-        <div className="h-6 bg-gray-300 rounded mb-2 w-3/4"></div>
-        <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-      </div>
-      <h2 className="text-lg font-bold">SignUp</h2>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 py-4">
         <Input
           {...register("name", {
             required: true,
           })}
           label="Name"
+          placeholder="Your Display Name"
+          Icon={<FaUser />}
         />
         {errors.name && (
           <p className="text-red-500 text-xs">{errors.name.message}</p>
         )}
-        <Input {...register("email")} label="Email" />
+        <Input
+          {...(register("email"),
+          {
+            required: true,
+          })}
+          label="Email"
+          placeholder="Email address"
+          Icon={<CgMail className="size-5" />}
+        />
         {errors.email && (
           <p className="text-red-500 text-xs">{errors.email.message}</p>
         )}
 
-        <PasswordInput {...register("password")} />
+        <PasswordInput
+          {...(register("password"),
+          {
+            required: true,
+          })}
+          placeholder="Enter your password"
+        />
         {errors.password && (
           <p className="text-red-500 text-xs">{errors.password.message}</p>
         )}

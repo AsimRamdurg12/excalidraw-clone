@@ -5,6 +5,7 @@ import PasswordInput from "../../ui/PasswordInput";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import Button from "../../ui/Button";
+import { FaUser } from "react-icons/fa";
 
 const SignInForm = () => {
   const {
@@ -36,12 +37,11 @@ const SignInForm = () => {
   };
   return (
     <form
-      className="flex flex-col text-wrap justify-center items-center bg-white w-fit px-4 py-8 rounded-r-lg gap-2"
+      className="flex flex-col bg-white w-full py-8 gap-2"
       onSubmit={handleSubmit(handleSubmitForm)}
     >
-      <h2 className="text-xl font-bold">Login</h2>
-      <div className="flex flex-col gap-2">
-        <Input label="Email" {...register("email")} />
+      <div className="flex flex-col gap-2 pb-5">
+        <Input label="Email" {...register("email")} Icon={<FaUser />} />
         {errors.email && (
           <p className="text-red-500 text-xs">{errors.email.message}</p>
         )}
@@ -52,9 +52,7 @@ const SignInForm = () => {
         )}
       </div>
       {errors.root && <p>{errors.root.message}</p>}
-      <Button type="submit" className="w-40">
-        Submit
-      </Button>
+      <Button type="submit">Submit</Button>
     </form>
   );
 };

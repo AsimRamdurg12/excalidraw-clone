@@ -16,13 +16,13 @@ const CalltoAction = () => {
           </p>
         </div>
 
-        <div className="flex items-center max-sm:flex-col justify-center my-5 gap-2 w-full">
-          <Button className="group bg-white text-blue-600 flex items-center justify-center gap-2 font-bold text-xl py-4 px-8 transform transition-all duration-300 hover:scale-105 hover:gap-4">
+        <div className="flex items-center max-sm:flex-col justify-center my-5 gap-4 w-full">
+          <Button className="group bg-white text-blue-600 flex items-center justify-center gap-2 font-bold text-xl py-4 px-8 transform transition-all duration-300 hover:scale-105">
             {" "}
             Start Creating Now - It's Free
             <BsArrowRight />
           </Button>
-          <Button className="group flex justify-center px-8 py-4 items-center gap-2 bg-transparent border transform transition-all duration-300 hover:bg-white/20 hover:scale-105 hover:gap-4">
+          <Button className="group flex justify-center px-8 py-4 items-center gap-2 bg-transparent border transform transition-all duration-300 hover:bg-white/20 hover:scale-105">
             Watch Demo Video
             <BsPlayBtn className="size-6" />
           </Button>
