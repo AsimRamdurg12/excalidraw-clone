@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { SignInSchema, type SignInValues } from "../../schemas/AuthSchema";
-import Input from "../ui/Input";
-import PasswordInput from "../ui/PasswordInput";
+import Input from "../../ui/Input";
+import PasswordInput from "../../ui/PasswordInput";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import Button from "../../ui/Button";
