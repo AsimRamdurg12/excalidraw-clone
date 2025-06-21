@@ -18,6 +18,12 @@ import { IoShareSocial } from "react-icons/io5";
 import { LiaLinkedin } from "react-icons/lia";
 import { LuUndo2 } from "react-icons/lu";
 
+import { Line } from "../components/SVG/Line";
+import Dashed from "../components/SVG/Dashed";
+import Dotted from "../components/SVG/Dotted";
+import Line2 from "../components/SVG/Line2";
+import Line3 from "../components/SVG/Line3";
+
 export const features = [
   {
     icon: BiPen,
@@ -208,3 +214,56 @@ export const Products = [
 ];
 
 export const Company = ["About", "Blog", "Careers", "Press", "Contact"];
+
+export const colors = [
+  {
+    color: "bg-black",
+    hex: "#000000",
+  },
+  {
+    color: "bg-red-500",
+    hex: "#FF0000",
+  },
+  {
+    color: "bg-green-500",
+    hex: "#00FF00",
+  },
+  {
+    color: "bg-blue-500",
+    hex: "#0000FF",
+  },
+  {
+    color: "bg-orange-500",
+    hex: "#FF6F00",
+  },
+];
+
+export const strokeStyle = [
+  {
+    type: "line",
+    svg: Line,
+  },
+  {
+    type: "dashed",
+    svg: Dashed,
+  },
+  {
+    type: "dotted",
+    svg: Dotted,
+  },
+];
+
+export const strokeWidth = [
+  {
+    type: "line1",
+    svg: Line,
+  },
+  {
+    type: "line2",
+    svg: Line2,
+  },
+  {
+    type: "line3",
+    svg: Line3,
+  },
+];

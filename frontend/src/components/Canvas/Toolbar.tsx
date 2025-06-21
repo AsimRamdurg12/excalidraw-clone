@@ -4,6 +4,7 @@ import { FaRegCircle } from "react-icons/fa";
 import { LuRectangleHorizontal } from "react-icons/lu";
 import type { Tool } from "./Canvas";
 import { HiHandRaised } from "react-icons/hi2";
+import { BsCursor } from "react-icons/bs";
 
 const Toolbar = ({
   selectedTool,
@@ -33,12 +34,17 @@ const Toolbar = ({
         <IconButton
           setSelectedTool={() => setSelectedTool("move")}
           active={selectedTool === "move"}
-          icon={<HiHandRaised />}
+          icon={<BsCursor />}
         />
         <IconButton
           setSelectedTool={() => setSelectedTool("eraser")}
           active={selectedTool === "eraser"}
           icon={<BiEraser />}
+        />
+        <IconButton
+          setSelectedTool={() => setSelectedTool("hand")}
+          active={selectedTool === "hand"}
+          icon={<HiHandRaised />}
         />
       </div>
     </div>
