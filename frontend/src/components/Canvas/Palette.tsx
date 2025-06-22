@@ -22,7 +22,7 @@ const Palette = ({
   setLineWidth,
 }: ColorPicker) => {
   return (
-    <div className="fixed rounded-lg left-2 top-16 border bg-white border-gray-500">
+    <div className="absolute rounded-lg left-2 top-16 border bg-white border-gray-500">
       <div className="flex flex-col p-2 gap-2">
         <div className="space-y-2">
           <h5 className="text-sm font-semibold">Stroke</h5>

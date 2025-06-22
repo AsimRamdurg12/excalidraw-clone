@@ -4,14 +4,7 @@ import Toolbar from "./Toolbar";
 import { Game } from "../../draw/Game";
 import Palette from "./Palette";
 
-export type Tool =
-  | "pencil"
-  | "rect"
-  | "circle"
-  | "move"
-  | "eraser"
-  | "hand"
-  | "select";
+export type Tool = "pencil" | "rect" | "circle" | "eraser" | "hand" | "select";
 
 const Canvas = ({ roomId }: { roomId: string }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -45,7 +38,7 @@ const Canvas = ({ roomId }: { roomId: string }) => {
   }
 
   return (
-    <div className="flex overflow-hidden h-screen">
+    <div className="relative flex overflow-hidden h-screen">
       <Palette
         stroke={stroke}
         setStroke={setStroke}

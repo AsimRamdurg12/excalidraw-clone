@@ -74,7 +74,7 @@ export class Game {
 
   setTool(tool: Tool) {
     this.selectedTool = tool;
-    if (this.selectedTool !== "move") {
+    if (this.selectedTool !== "select") {
       this.canvas.style.cursor = "crosshair";
     } else {
       this.canvas.style.cursor = "default";
@@ -133,34 +133,66 @@ export class Game {
     }
   }
 
-  drawOutline(shape: Shape) {
-    if (shape.type === "rect") {
-      this.ctx.save();
-      this.ctx.setLineDash([5, 5]);
-      this.ctx.strokeStyle = "blue";
-
-      this.ctx.strokeRect(
-        shape.x - 5,
-        shape.y - 5,
-        shape.width + 10,
-        shape.height + 10
-      );
-    }
-    this.ctx.setLineDash([]);
-    this.ctx.strokeStyle = "black"; // Reset
-    this.ctx.restore();
-  }
-
   clearCanvas() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.existingShapes.forEach((shape) => {
       this.drawShape(shape.shape);
-
-      if (shape === this.activeShape && this.clicked) {
-        this.drawOutline(this.activeShape.shape);
-      }
     });
+  }
+
+  onEdge(x: number, y: number, shape: Shape) {
+    const t = 10;
+    switch (shape.type) {
+      case "rect":
+        return (
+          Math.abs(x - shape.x) < t ||
+          Math.abs(x - shape.x + shape.width) < t ||
+          Math.abs(y - shape.y) < t ||
+          Math.abs(y - shape.y + shape.height) < t
+        );
+
+      case "circle":
+        return (
+          Math.abs(Math.hypot(x - shape.x, y - shape.y) - shape.radius) < t
+        );
+
+      case "pencil": {
+        const px = shape.points.map((s) => s.x);
+        const py = shape.points.map((s) => s.y);
+
+        const minX = Math.min(...px);
+        const minY = Math.min(...py);
+        const maxX = Math.max(...px);
+        const maxY = Math.max(...py);
+
+        return (
+          Math.abs(x - minX) < t ||
+          Math.abs(x - maxX) < t ||
+          Math.abs(y - minY) < t ||
+          Math.abs(y - maxY) < t
+        );
+      }
+
+      default:
+        return false;
+    }
+  }
+
+  insideShape(x: number, y: number, shape: Shape) {
+    if (shape.type === "rect") {
+      return (
+        x >= shape.x &&
+        x <= shape.x + shape.width &&
+        y >= shape.y &&
+        y <= shape.y + shape.height
+      );
+    } else if (shape.type === "circle") {
+      return Math.hypot(x - shape.x, y - shape.y) <= shape.radius;
+    } else if (shape.type === "pencil") {
+      return shape.points.some((p) => Math.hypot(x - p.x, y - p.y) < 10);
+    }
+    return false;
   }
 
   getMovedShape(movedshape: AllShapes): AllShapes | null {
@@ -199,13 +231,6 @@ export class Game {
     };
   }
 
-  eraseShape(e: MouseEvent, shape: AllShapes) {
-    const x = e.clientX;
-    const y = e.clientY;
-
-    return { shape, x, y };
-  }
-
   mouseDownHandler = (e: MouseEvent) => {
     this.clicked = true;
     this.startX = e.clientX;
@@ -240,7 +265,7 @@ export class Game {
       return false;
     });
 
-    if (this.selectedTool === "move") {
+    if (this.selectedTool === "select") {
       console.log(shapeToMove);
 
       if (shapeToMove) {
@@ -257,15 +282,6 @@ export class Game {
             offsetY: 0,
           },
         };
-
-        this.drawOutline(shapeToMove.shape);
-      }
-    } else if (this.selectedTool === "eraser") {
-      this.eraseShape(e, this.activeShape!);
-    } else if (this.selectedTool === "select") {
-      if (shapeToMove) {
-        this.activeShape = shapeToMove;
-        this.drawOutline(shapeToMove.shape);
       }
     }
   };
@@ -306,7 +322,7 @@ export class Game {
         type: "pencil",
         points: this.currentPencilStroke,
       };
-    } else if (selectedTool === "move") {
+    } else if (selectedTool === "select") {
       this.canvas.style.cursor = "crosshair";
       const moveShape = this.activeShape;
       if (!moveShape || moveShape.shape.type !== "move") return;
@@ -377,7 +393,7 @@ export class Game {
         );
         this.ctx.stroke();
         this.ctx.closePath();
-      } else if (selectedTool === "move" && this.activeShape) {
+      } else if (selectedTool === "select" && this.activeShape) {
         if (this.activeShape?.shape.type === "move") {
           this.activeShape.shape.offsetX = x - this.startX;
           this.activeShape.shape.offsetY = y - this.startY;

@@ -4,7 +4,7 @@ import { FaRegCircle } from "react-icons/fa";
 import { LuRectangleHorizontal } from "react-icons/lu";
 import type { Tool } from "./Canvas";
 import { HiHandRaised } from "react-icons/hi2";
-import { BsCursor } from "react-icons/bs";
+import { FcCursor } from "react-icons/fc";
 
 const Toolbar = ({
   selectedTool,
@@ -14,8 +14,13 @@ const Toolbar = ({
   setSelectedTool: (s: Tool) => void;
 }) => {
   return (
-    <div className="fixed flex justify-center mt-5 w-full">
+    <div className="absolute flex justify-center mt-5 w-full">
       <div className="opacity-100 flex gap-5 bg-violet-50 w-fit px-4 border rounded-lg">
+        <IconButton
+          setSelectedTool={() => setSelectedTool("select")}
+          active={selectedTool === "select"}
+          icon={<FcCursor />}
+        />
         <IconButton
           active={selectedTool === "rect"}
           icon={<LuRectangleHorizontal />}
@@ -30,11 +35,6 @@ const Toolbar = ({
           setSelectedTool={() => setSelectedTool("pencil")}
           active={selectedTool === "pencil"}
           icon={<BiPencil />}
-        />
-        <IconButton
-          setSelectedTool={() => setSelectedTool("move")}
-          active={selectedTool === "move"}
-          icon={<BsCursor />}
         />
         <IconButton
           setSelectedTool={() => setSelectedTool("eraser")}
