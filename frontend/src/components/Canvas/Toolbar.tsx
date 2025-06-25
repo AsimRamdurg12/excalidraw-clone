@@ -5,6 +5,10 @@ import { LuRectangleHorizontal } from "react-icons/lu";
 import type { Tool } from "./Canvas";
 import { HiHandRaised } from "react-icons/hi2";
 import { FcCursor } from "react-icons/fc";
+import { TbOvalVertical } from "react-icons/tb";
+import { FaT } from "react-icons/fa6";
+import { Line } from "../SVG/Line";
+import { BsArrow90DegRight } from "react-icons/bs";
 
 const Toolbar = ({
   selectedTool,
@@ -32,9 +36,30 @@ const Toolbar = ({
           icon={<FaRegCircle />}
         />
         <IconButton
+          setSelectedTool={() => setSelectedTool("ellipse")}
+          icon={<TbOvalVertical />}
+          active={selectedTool === "ellipse"}
+        />
+        <IconButton
           setSelectedTool={() => setSelectedTool("pencil")}
           active={selectedTool === "pencil"}
           icon={<BiPencil />}
+        />
+        <IconButton
+          setSelectedTool={() => setSelectedTool("line")}
+          active={selectedTool === "line"}
+          icon={<Line />}
+        />
+        <IconButton
+          setSelectedTool={() => setSelectedTool("arrow")}
+          active={selectedTool === "arrow"}
+          icon={<BsArrow90DegRight />}
+        />
+
+        <IconButton
+          setSelectedTool={() => setSelectedTool("text")}
+          active={selectedTool === "text"}
+          icon={<FaT />}
         />
         <IconButton
           setSelectedTool={() => setSelectedTool("eraser")}

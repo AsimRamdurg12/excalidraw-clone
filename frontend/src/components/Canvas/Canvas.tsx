@@ -4,7 +4,17 @@ import Toolbar from "./Toolbar";
 import { Game } from "../../draw/Game";
 import Palette from "./Palette";
 
-export type Tool = "pencil" | "rect" | "circle" | "eraser" | "hand" | "select";
+export type Tool =
+  | "pencil"
+  | "rect"
+  | "circle"
+  | "ellipse"
+  | "line"
+  | "arrow"
+  | "text"
+  | "eraser"
+  | "hand"
+  | "select";
 
 const Canvas = ({ roomId }: { roomId: string }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
