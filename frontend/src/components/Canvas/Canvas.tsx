@@ -3,6 +3,7 @@ import { useSocket } from "../../hooks/useSocket";
 import Toolbar from "./Toolbar";
 import { Game } from "../../draw/Game";
 import Palette from "./Palette";
+import Zoom from "./Zoom";
 
 export type Tool =
   | "pencil"
@@ -60,6 +61,7 @@ const Canvas = ({ roomId }: { roomId: string }) => {
         setLineWidth={setLineWidth}
       />
       <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+      <Zoom zoomIn={() => game?.zoomIn()} zoomOut={() => game?.zoomOut()} />
       <canvas height={innerHeight} width={innerWidth} ref={canvasRef}></canvas>
     </div>
   );

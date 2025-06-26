@@ -126,6 +126,9 @@ export class Game {
   private scale = 1;
   private minScale = 0.1;
   private maxScale = 5;
+  private isPanning = false;
+  private panStartX = 0;
+  private panStartY = 0;
 
   constructor(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket) {
     this.canvas = canvas;
@@ -145,7 +148,6 @@ export class Game {
       this.finishTextInput(true);
       return;
     }
-
     this.isDrawing = true;
     const pos = this.getMousPos(e);
     this.startX = pos.x;
@@ -173,13 +175,23 @@ export class Game {
       case "eraser":
         // Eraser logic on mouse down (if any)
         break;
+      case "hand":
+        this.isPanning = true;
+        this.panStartX = e.clientX;
+        this.panStartY = e.clientY;
+        this.canvas.style.cursor = "grabbing";
     }
   };
 
   private mouseMoveHandler = (e: MouseEvent) => {
     const pos = this.getMousPos(e);
-
-    if (this.selectedTool === "select") {
+    if (this.selectedTool === "hand" && this.isPanning && this.isDrawing) {
+      const deltaX = e.clientX - this.panStartX;
+      const deltaY = e.clientY - this.panStartY;
+      this.pan(deltaX, deltaY);
+      this.panStartX = e.clientX;
+      this.panStartY = e.clientY;
+    } else if (this.selectedTool === "select") {
       this.handleSelectMouseMove(pos);
     } else if (this.isDrawing && this.activeShape) {
       this.updateDrawingShape(pos);
@@ -192,7 +204,10 @@ export class Game {
 
   private mouseUpHandler = () => {
     this.isDrawing = false;
-    if (this.selectedTool === "select") {
+    if (this.selectedTool === "hand" && this.isPanning) {
+      this.isPanning = false;
+      this.canvas.style.cursor = "grab";
+    } else if (this.selectedTool === "select") {
       this.handleSelectMouseUp();
     } else if (this.activeShape) {
       this.existingShapes.push(this.activeShape);
@@ -272,7 +287,7 @@ export class Game {
         return { type: "arrow", x1: x, y1: y, x2: x, y2: y };
       case "pencil":
         return { type: "pencil", points: [{ x: x, y: y }] };
-        break;
+
       default:
         throw new Error(`Unknown shape tool: ${tool}`);
     }
@@ -330,6 +345,9 @@ export class Game {
       case "eraser":
         this.canvas.style.cursor = "cell";
         break;
+      case "hand":
+        this.canvas.style.cursor = "grab";
+        break;
       default:
         this.canvas.style.cursor = "crosshair";
     }
@@ -353,12 +371,16 @@ export class Game {
     this.socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "shapes") {
-        this.existingShapes.push({ shape: message.message });
+        this.existingShapes.push(message.message);
+        console.log(this.existingShapes);
+
         this.saveState();
         this.clearCanvas();
       }
       if (message.type === "update") {
         const updatedShapeData = message.message;
+        console.log(updatedShapeData);
+
         this.existingShapes = this.existingShapes.map((s) =>
           s.id === updatedShapeData.id ? updatedShapeData : s
         );
@@ -445,6 +467,19 @@ export class Game {
 
       this.clearCanvas();
     }
+  }
+
+  zoomIn() {
+    const centerX = this.canvas.width / 2;
+    const centerY = this.canvas.height / 2;
+    this.zoom(1.1, centerX, centerY);
+  }
+
+  // Zoom out by 10% (0.9x)
+  zoomOut() {
+    const centerX = this.canvas.width / 2;
+    const centerY = this.canvas.height / 2;
+    this.zoom(0.9, centerX, centerY);
   }
 
   getMousPos(e: MouseEvent) {
@@ -643,6 +678,7 @@ export class Game {
 
     const clickedElement = this.getElementAtPosition(pos);
     if (clickedElement) {
+      console.log(clickedElement);
       this.selectedElements = [clickedElement];
       this.isMoving = true;
       this.dragX = pos.x;
@@ -651,7 +687,6 @@ export class Game {
       this.selectedElements = [];
       this.createSelectionBox(pos);
     }
-    this.clearCanvas();
   }
 
   handleSelectMouseMove(pos: { x: number; y: number }) {
@@ -675,7 +710,21 @@ export class Game {
     if (this.selectionBox) {
       this.finalizeSelectionBox();
     }
-    if (this.activeShape && (this.isMoving || this.isResizing)) {
+
+    if (this.isMoving && this.selectedElements.length > 0) {
+      // Send updates for all moved elements
+      this.selectedElements.forEach((element) => {
+        this.socket.send(
+          JSON.stringify({
+            type: "update",
+            message: element,
+            roomId: this.roomId,
+          })
+        );
+      });
+      this.saveState();
+    } else if (this.activeShape && this.isResizing) {
+      // Send update for resized element
       this.socket.send(
         JSON.stringify({
           type: "update",
@@ -685,6 +734,7 @@ export class Game {
       );
       this.saveState();
     }
+
     this.isMoving = false;
     this.isResizing = false;
     this.resizeHandle = null;
@@ -693,7 +743,6 @@ export class Game {
     this.clearCanvas();
   }
 
-  // FIX: Corrected resizeElement logic
   resizeElement(element: Shape, pos: { x: number; y: number }): Shape {
     if (!this.originalShape || !this.resizeHandle) return element;
 

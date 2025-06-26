@@ -7,8 +7,8 @@ import { HiHandRaised } from "react-icons/hi2";
 import { FcCursor } from "react-icons/fc";
 import { TbOvalVertical } from "react-icons/tb";
 import { FaT } from "react-icons/fa6";
-import { Line } from "../SVG/Line";
-import { BsArrow90DegRight } from "react-icons/bs";
+import { GoDash } from "react-icons/go";
+import { MdArrowOutward } from "react-icons/md";
 
 const Toolbar = ({
   selectedTool,
@@ -48,12 +48,12 @@ const Toolbar = ({
         <IconButton
           setSelectedTool={() => setSelectedTool("line")}
           active={selectedTool === "line"}
-          icon={<Line />}
+          icon={<GoDash />}
         />
         <IconButton
           setSelectedTool={() => setSelectedTool("arrow")}
           active={selectedTool === "arrow"}
-          icon={<BsArrow90DegRight />}
+          icon={<MdArrowOutward />}
         />
 
         <IconButton
