@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import WebSocketSetup from "./ws/ws";
 import { createServer } from "http";
 import AuthRoutes from "./routes/AuthRoutes";
@@ -12,9 +13,11 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:5173",
+    credentials: true,
   })
 );
 

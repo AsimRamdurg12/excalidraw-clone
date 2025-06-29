@@ -61,6 +61,53 @@ export const createRoom = async (req: Request, res: Response) => {
   }
 };
 
+export const getRooms = async (req: Request, res: Response) => {
+  try {
+    const id = req.id;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "Please login to join the room",
+      });
+      return;
+    }
+
+    const rooms = await prisma.room.findMany({
+      where: {
+        adminId: id,
+      },
+    });
+
+    if (!rooms) {
+      res.status(404).json({
+        success: false,
+        message: "No Rooms found. Please create one.",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: rooms,
+    });
+
+    return;
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Error in getRooms: ${error}`,
+    });
+    return;
+  }
+};
+
 export const getRoomBySlug = async (req: Request, res: Response) => {
   try {
     const id = req.id;

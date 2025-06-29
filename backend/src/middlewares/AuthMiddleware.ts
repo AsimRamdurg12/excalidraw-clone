@@ -7,10 +7,7 @@ export const authMiddleWare = (
   next: NextFunction
 ) => {
   try {
-    let authHeaders = req.headers["authorization"];
-
-    const token = authHeaders && authHeaders.split(" ")[1];
-
+    const token = req.cookies["jwt"];
     if (!token) {
       res.status(403).json({
         success: false,
@@ -19,15 +16,16 @@ export const authMiddleWare = (
       return;
     }
 
-    jwt.verify(token, process.env.JWT_SECRET as string, (error, id) => {
-      if (error) {
+    jwt.verify(token, process.env.JWT_SECRET as string, (err: any, id: any) => {
+      if (err) {
         res.status(401).json({
           success: false,
-          message: "Unauthorized: invalid token",
+          message: "Unauthorized: Invalid token",
         });
+        return;
       }
 
-      req.id = id as string;
+      req.id = id;
 
       next();
     });

@@ -91,6 +91,12 @@ export const signIn = async (req: Request, res: Response) => {
 
     const token = jwt.sign(user.id, process.env.JWT_SECRET as string);
 
+    res.cookie("jwt", token, {
+      maxAge: 15 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: false,
+    });
+
     res.status(200).json({
       success: true,
       message: token,
@@ -100,6 +106,38 @@ export const signIn = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: `Error in signIn: ${error}`,
+    });
+    return;
+  }
+};
+
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const id = req.id;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: user,
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Error in getProfile: ${error}`,
     });
     return;
   }

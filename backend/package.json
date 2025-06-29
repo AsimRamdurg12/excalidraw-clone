@@ -9,11 +9,13 @@
     "dev": "tsc -b && node dist/index.js"
   },
   "dependencies": {
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.18",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.21",
     "@types/ws": "^8.18.1",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
