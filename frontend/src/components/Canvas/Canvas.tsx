@@ -4,11 +4,13 @@ import Toolbar from "./Toolbar";
 import { Game } from "../../draw/Game";
 import Palette from "./Palette";
 import Zoom from "./Zoom";
+import { useWindowSize } from "../../hooks/useWindowSize";
+
+export type Style = "line" | "dotted" | "dashed";
 
 export type Tool =
   | "pencil"
   | "rect"
-  | "circle"
   | "ellipse"
   | "line"
   | "arrow"
@@ -22,16 +24,19 @@ const Canvas = ({ roomId }: { roomId: string }) => {
 
   const { socket } = useSocket(roomId);
 
+  const size = useWindowSize();
+
   const [game, setGame] = useState<Game>();
-  const [selectedTool, setSelectedTool] = useState<Tool>("circle");
+  const [selectedTool, setSelectedTool] = useState<Tool>("hand");
   const [stroke, setStroke] = useState("#000000");
-  const [color, setColor] = useState("");
-  const [strokeType, setStrokeType] = useState("line");
-  const [lineWidth, setLineWidth] = useState("line1");
+  const [color, setColor] = useState("transparent");
+  const [strokeType, setStrokeType] = useState<Style>("line");
+  const [lineWidth, setLineWidth] = useState(1);
 
   useEffect(() => {
     game?.setTool(selectedTool);
-  }, [selectedTool, game]);
+    game?.setPalette(stroke, color, strokeType, lineWidth);
+  }, [selectedTool, game, stroke, color, strokeType, lineWidth]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -62,7 +67,7 @@ const Canvas = ({ roomId }: { roomId: string }) => {
       />
       <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
       <Zoom zoomIn={() => game?.zoomIn()} zoomOut={() => game?.zoomOut()} />
-      <canvas height={innerHeight} width={innerWidth} ref={canvasRef}></canvas>
+      <canvas height={size[1]} width={size[0]} ref={canvasRef}></canvas>
     </div>
   );
 };

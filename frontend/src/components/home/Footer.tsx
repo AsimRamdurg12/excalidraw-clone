@@ -39,8 +39,8 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Product</h3>
             <ul className="space-y-3">
-              {Products.map((product) => (
-                <li>
+              {Products.map((product, index) => (
+                <li key={index}>
                   <a
                     href="#"
                     className="text-gray-400 hover:text-white transition-colors"
@@ -56,8 +56,8 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Company</h3>
             <ul className="space-y-3">
-              {Company.map((company) => (
-                <li>
+              {Company.map((company, index) => (
+                <li key={index}>
                   <a
                     href="#"
                     className="text-gray-400 hover:text-white transition-colors"

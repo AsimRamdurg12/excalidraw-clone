@@ -1,9 +1,12 @@
+import { useParams } from "react-router-dom";
 import Canvas from "./Canvas";
 
 const RoomCanvas = () => {
+  const params = useParams();
+
   return (
     <div>
-      <Canvas roomId="2" />
+      <Canvas roomId={params.id!} />
     </div>
   );
 };

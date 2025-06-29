@@ -1,4 +1,5 @@
 import { colors, strokeStyle, strokeWidth } from "../../lib/constants";
+import type { Style } from "./Canvas";
 
 interface ColorPicker {
   stroke: string;
@@ -6,9 +7,9 @@ interface ColorPicker {
   color: string;
   setColor: (c: string) => void;
   strokeType: string;
-  setStrokeType: (s: string) => void;
-  lineWidth: string;
-  setLineWidth: (s: string) => void;
+  setStrokeType: (s: Style) => void;
+  lineWidth: number;
+  setLineWidth: (s: number) => void;
 }
 
 const Palette = ({
@@ -63,7 +64,7 @@ const Palette = ({
                   className={`size-6 rounded ${
                     strokeType === c.type && "ring-2 ring-blue-300"
                   }`}
-                  onClick={() => setStrokeType(c.type)}
+                  onClick={() => setStrokeType(c.type as Style)}
                 >
                   <Icon />
                 </div>

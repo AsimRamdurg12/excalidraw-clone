@@ -1,8 +1,8 @@
-import axios from "axios";
+import { api } from "../lib/axios";
 
 export async function getExistingShapes(roomId: string) {
   try {
-    const response = await axios.get(
+    const response = await api.get(
       `http://localhost:3001/api/shapes/room/${roomId}`
     );
     const message = await response.data.message;

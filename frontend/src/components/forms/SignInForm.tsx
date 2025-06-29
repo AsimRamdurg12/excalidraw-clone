@@ -6,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import Button from "../../ui/Button";
 import { FaUser } from "react-icons/fa";
+import useAuth from "../../context/AuthContext";
+import { api } from "../../lib/axios";
+import { useNavigate } from "react-router-dom";
 
 const SignInForm = () => {
   const {
@@ -21,15 +24,21 @@ const SignInForm = () => {
     },
   });
 
+  const { setToken } = useAuth();
+  const navigate = useNavigate();
+
   const handleSubmitForm = async (data: SignInValues) => {
     try {
-      const response = await axios.post(
-        "http://localhost:3001/api/auth/sign-in",
-        data
-      );
+      axios.defaults.withCredentials = true;
+      const response = await api.post("/auth/sign-in", data);
       const result = await response.data;
+      if (result.success) {
+        const jwtToken = result.message;
+        setToken(jwtToken);
 
-      console.log(result);
+        localStorage.setItem("token", jwtToken);
+        navigate("/dashboard");
+      }
     } catch (error) {
       const axiosError = error as AxiosError;
       setError("root", axiosError);

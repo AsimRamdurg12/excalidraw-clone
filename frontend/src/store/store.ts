@@ -15,7 +15,7 @@ type CanvasState = {
 };
 
 export const useCanvasStore = create<CanvasState>((set) => ({
-  tool: "circle",
+  tool: "hand",
   stroke: "#000000",
   color: "",
   strokeType: "line",

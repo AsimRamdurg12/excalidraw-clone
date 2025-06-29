@@ -24,6 +24,15 @@ import Dotted from "../components/SVG/Dotted";
 import Line2 from "../components/SVG/Line2";
 import Line3 from "../components/SVG/Line3";
 
+import Image1 from "../assets/Image1.jpg";
+import Image4 from "../assets/Image4.jpg";
+import Image6 from "../assets/Image6.jpg";
+import Image7 from "../assets/Image7.jpg";
+import Image8 from "../assets/Image8.jpg";
+import Image2 from "../assets/colorful-people-pattern-with-hand-drawn-style_23-2147856625.jpg";
+import Image3 from "../assets/png-group-international-business-owner-clothing-man-illustration_53876-1056603.jpg";
+import Image5 from "../assets/sketch-hand-drawn-single-line-art-coloring-page-line-drawing-isolated-white-background_469760-7646.jpg";
+
 export const features = [
   {
     icon: BiPen,
@@ -255,15 +264,26 @@ export const strokeStyle = [
 
 export const strokeWidth = [
   {
-    type: "line1",
+    type: 1,
     svg: Line,
   },
   {
-    type: "line2",
+    type: 3,
     svg: Line2,
   },
   {
-    type: "line3",
+    type: 5,
     svg: Line3,
   },
+];
+
+export const images = [
+  Image1,
+  Image2,
+  Image3,
+  Image4,
+  Image5,
+  Image6,
+  Image7,
+  Image8,
 ];

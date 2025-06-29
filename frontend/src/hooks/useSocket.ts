@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 export const useSocket = (roomId: string) => {
   const [socket, setSocket] = useState<WebSocket>();
 
+  const token = localStorage.getItem("token");
   useEffect(() => {
-    const ws = new WebSocket(
-      `ws://localhost:3001?token=eyJhbGciOiJIUzI1NiJ9.ZWRlYzA0ZjgtNDM2My00MTlhLTk2MGUtODNhOGQ0OWQzMDM5.R2MrLFSIHt_ImfWMfo8cbdf7NCRqSZ9Koew2hEXS-uo`
-    );
+    const ws = new WebSocket(`ws://localhost:3001?token=${token}`);
 
     ws.onopen = () => {
       setSocket(ws);
@@ -29,7 +28,7 @@ export const useSocket = (roomId: string) => {
         ws.send(data);
       };
     };
-  }, [roomId]);
+  }, [roomId, token]);
 
   return { socket };
 };

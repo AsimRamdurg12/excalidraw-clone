@@ -1,4 +1,4 @@
-import type { Tool } from "../components/Canvas/Canvas";
+import type { Style, Tool } from "../components/Canvas/Canvas";
 import { getExistingShapes } from "./http";
 
 type AllShapes = {
@@ -18,15 +18,10 @@ type Shape =
       y: number;
       width: number;
       height: number;
-    }
-  | {
-      type: "circle";
-      x: number;
-      y: number;
-      radius: number;
-      startAngle: number;
-      endAngle: number;
-      counterClockwise: boolean;
+      strokeColor: string;
+      fillColor: string;
+      strokeWidth: number;
+      strokeStyle: Style;
     }
   | {
       type: "ellipse";
@@ -38,10 +33,17 @@ type Shape =
       startAngle: number;
       endAngle: number;
       counterClockWise: boolean;
+      strokeColor: string;
+      fillColor: string;
+      strokeWidth: number;
+      strokeStyle: Style;
     }
   | {
       type: "pencil";
       points: { x: number; y: number }[];
+      strokeColor: string;
+      strokeWidth: number;
+      strokeStyle: Style;
     }
   | {
       type: "text";
@@ -58,6 +60,9 @@ type Shape =
       y1: number;
       x2: number;
       y2: number;
+      strokeColor: string;
+      strokeWidth: number;
+      strokeStyle: Style;
     }
   | {
       type: "arrow";
@@ -65,6 +70,9 @@ type Shape =
       y1: number;
       x2: number;
       y2: number;
+      strokeColor: string;
+      strokeWidth: number;
+      strokeStyle: Style;
     }
   | {
       type: "move";
@@ -90,7 +98,7 @@ export class Game {
   private redoStack: AllShapes[][] = [];
 
   // Drawing State
-  private selectedTool: Tool = "circle";
+  private selectedTool: Tool = "hand";
   private currentPencilStroke: { x: number; y: number }[] = [];
   private activeShape: AllShapes | null = null;
   private originalShape: Shape | null = null;
@@ -104,6 +112,7 @@ export class Game {
   private strokeColor = "#000000";
   private fillColor = "transparent";
   private strokeWidth = 2;
+  private strokeStyle: Style = "line";
   private fontSize = 16;
   private fontFamily = "Arial";
 
@@ -164,7 +173,6 @@ export class Game {
         this.currentPencilStroke = [{ x: pos.x, y: pos.y }];
         break;
       case "rect":
-      case "circle":
       case "ellipse":
       case "line":
       case "arrow":
@@ -198,7 +206,13 @@ export class Game {
     } else if (this.isDrawing && this.selectedTool === "pencil") {
       this.currentPencilStroke.push({ x: pos.x, y: pos.y });
       this.clearCanvas();
-      this.drawShape({ type: "pencil", points: this.currentPencilStroke });
+      this.drawShape({
+        type: "pencil",
+        points: this.currentPencilStroke,
+        strokeColor: this.strokeColor,
+        strokeStyle: this.strokeStyle,
+        strokeWidth: this.strokeWidth,
+      });
     }
   };
 
@@ -210,7 +224,6 @@ export class Game {
     } else if (this.selectedTool === "select") {
       this.handleSelectMouseUp();
     } else if (this.activeShape) {
-      this.existingShapes.push(this.activeShape);
       this.socket.send(
         JSON.stringify({
           type: "shapes",
@@ -226,6 +239,9 @@ export class Game {
       const pencilShape: Shape = {
         type: "pencil",
         points: this.currentPencilStroke,
+        strokeColor: this.strokeColor,
+        strokeStyle: this.strokeStyle,
+        strokeWidth: this.strokeWidth,
       };
 
       this.socket.send(
@@ -256,17 +272,16 @@ export class Game {
   private createInitialShape(tool: Tool, x: number, y: number): Shape {
     switch (tool) {
       case "rect":
-        return { type: "rect", x, y, width: 0, height: 0 };
-      case "circle":
-        // FIX: Initialize all properties for circle
         return {
-          type: "circle",
+          type: "rect",
           x,
           y,
-          radius: 0,
-          startAngle: 0,
-          endAngle: 2 * Math.PI,
-          counterClockwise: false,
+          width: 0,
+          height: 0,
+          strokeColor: this.strokeColor,
+          strokeStyle: this.strokeStyle,
+          strokeWidth: this.strokeWidth,
+          fillColor: this.fillColor,
         };
       case "ellipse":
         // FIX: Initialize all properties for ellipse
@@ -280,13 +295,41 @@ export class Game {
           startAngle: 0,
           endAngle: 2 * Math.PI,
           counterClockWise: false,
+          strokeColor: this.strokeColor,
+          strokeStyle: this.strokeStyle,
+          strokeWidth: this.strokeWidth,
+          fillColor: this.fillColor,
         };
       case "line":
-        return { type: "line", x1: x, y1: y, x2: x, y2: y };
+        return {
+          type: "line",
+          x1: x,
+          y1: y,
+          x2: x,
+          y2: y,
+          strokeColor: this.strokeColor,
+          strokeStyle: this.strokeStyle,
+          strokeWidth: this.strokeWidth,
+        };
       case "arrow":
-        return { type: "arrow", x1: x, y1: y, x2: x, y2: y };
+        return {
+          type: "arrow",
+          x1: x,
+          y1: y,
+          x2: x,
+          y2: y,
+          strokeColor: this.strokeColor,
+          strokeStyle: this.strokeStyle,
+          strokeWidth: this.strokeWidth,
+        };
       case "pencil":
-        return { type: "pencil", points: [{ x: x, y: y }] };
+        return {
+          type: "pencil",
+          points: [{ x: x, y: y }],
+          strokeColor: this.strokeColor,
+          strokeStyle: this.strokeStyle,
+          strokeWidth: this.strokeWidth,
+        };
 
       default:
         throw new Error(`Unknown shape tool: ${tool}`);
@@ -304,9 +347,6 @@ export class Game {
       case "rect":
         shape.width = dx;
         shape.height = dy;
-        break;
-      case "circle":
-        shape.radius = Math.sqrt(dx * dx + dy * dy);
         break;
       case "ellipse":
         // FIX: Corrected ellipse drawing to use bounding box logic
@@ -351,6 +391,13 @@ export class Game {
       default:
         this.canvas.style.cursor = "crosshair";
     }
+  }
+
+  setPalette(stroke: string, background: string, style: Style, width: number) {
+    this.strokeColor = stroke;
+    this.strokeWidth = width;
+    this.fillColor = background;
+    this.strokeStyle = style;
   }
 
   async init() {
@@ -506,11 +553,6 @@ export class Game {
           pos.y >= element.y &&
           pos.y <= element.y + element.height
         );
-      case "circle": {
-        const dx = pos.x - element.x;
-        const dy = pos.y - element.y;
-        return dx * dx + dy * dy <= element.radius * element.radius;
-      }
       case "ellipse": {
         // FIX: Ellipse hit detection is mathematically correct based on bounding box (x, y, width, height)
         const centerX = element.x + element.width / 2;
@@ -578,13 +620,7 @@ export class Game {
           element.y >= minY &&
           element.y + element.height <= maxY
         );
-      case "circle":
-        return (
-          element.x - element.radius >= minX &&
-          element.x + element.radius <= maxX &&
-          element.y - element.radius >= minY &&
-          element.y + element.radius <= maxY
-        );
+
       case "pencil":
         return element.points.every(
           (point) =>
@@ -642,9 +678,6 @@ export class Game {
         element.shape.type === "ellipse" ||
         element.shape.type === "text"
       ) {
-        element.shape.x += dx;
-        element.shape.y += dy;
-      } else if (element.shape.type === "circle") {
         element.shape.x += dx;
         element.shape.y += dy;
       } else if (
@@ -873,13 +906,6 @@ export class Game {
         width: shape.width,
         height: shape.height,
       };
-    } else if (shape.type === "circle") {
-      bounds = {
-        x: shape.x - shape.radius,
-        y: shape.y - shape.radius,
-        width: shape.radius * 2,
-        height: shape.radius * 2,
-      };
     } else if (shape.type === "pencil") {
       bounds = this.getPathBounds(shape.points);
     } else if (shape.type === "line" || shape.type === "arrow") {
@@ -926,35 +952,30 @@ export class Game {
 
   drawShape(shape: Shape) {
     this.ctx.save();
-    this.ctx.strokeStyle = this.strokeColor;
-    this.ctx.lineWidth = this.strokeWidth / this.scale;
-    this.ctx.fillStyle = this.fillColor;
 
     switch (shape.type) {
       case "rect":
-        this.ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
-        if (this.fillColor !== "transparent") {
-          this.ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
-        }
-        break;
-      case "circle":
         this.ctx.beginPath();
-        this.ctx.arc(
-          shape.x,
-          shape.y,
-          shape.radius,
-          shape.startAngle,
-          shape.endAngle,
-          shape.counterClockwise
-        );
+        this.ctx.lineWidth = shape.strokeWidth;
+        this.ctx.strokeStyle = shape.strokeColor;
+        if (shape.strokeStyle === "dotted") this.ctx.setLineDash([3, 3]);
+        if (shape.strokeStyle === "dashed") this.ctx.setLineDash([6, 6]);
+        this.ctx.rect(shape.x, shape.y, shape.width, shape.height);
+        if (shape.fillColor === "") this.ctx.fillStyle = "transparent";
+        else this.ctx.fillStyle = shape.fillColor;
+        this.ctx.fill();
         this.ctx.stroke();
-        if (this.fillColor !== "transparent") {
-          this.ctx.fill();
-        }
         this.ctx.closePath();
+
         break;
+
       case "ellipse":
         this.ctx.beginPath();
+        this.ctx.lineWidth = shape.strokeWidth;
+        this.ctx.strokeStyle = shape.strokeColor;
+        if (shape.strokeStyle === "dotted") this.ctx.setLineDash([3, 3]);
+        if (shape.strokeStyle === "dashed") this.ctx.setLineDash([6, 6]);
+
         this.ctx.ellipse(
           shape.x + shape.width / 2,
           shape.y + shape.height / 2,
@@ -965,15 +986,19 @@ export class Game {
           shape.endAngle,
           shape.counterClockWise
         );
+        this.ctx.fillStyle = shape.fillColor;
+        this.ctx.fill();
         this.ctx.stroke();
-        if (this.fillColor !== "transparent") {
-          this.ctx.fill();
-        }
         this.ctx.closePath();
+
         break;
       case "pencil":
         if (shape.points.length > 0) {
           this.ctx.beginPath();
+          this.ctx.strokeStyle = shape.strokeColor;
+          if (shape.strokeStyle === "dotted") this.ctx.setLineDash([3, 3]);
+          if (shape.strokeStyle === "dashed") this.ctx.setLineDash([6, 6]);
+          this.ctx.lineWidth = shape.strokeWidth;
           this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
           shape.points.forEach((point) => this.ctx.lineTo(point.x, point.y));
           this.ctx.stroke();
@@ -990,6 +1015,10 @@ export class Game {
       // NEW: Line drawing logic
       case "line":
         this.ctx.beginPath();
+        this.ctx.strokeStyle = shape.strokeColor;
+        if (shape.strokeStyle === "dotted") this.ctx.setLineDash([3, 3]);
+        if (shape.strokeStyle === "dashed") this.ctx.setLineDash([6, 6]);
+        this.ctx.lineWidth = shape.strokeWidth;
         this.ctx.moveTo(shape.x1, shape.y1);
         this.ctx.lineTo(shape.x2, shape.y2);
         this.ctx.stroke();
@@ -998,6 +1027,10 @@ export class Game {
       // NEW: Arrow drawing logic
       case "arrow":
         this.ctx.beginPath();
+        this.ctx.strokeStyle = shape.strokeColor;
+        if (shape.strokeStyle === "dotted") this.ctx.setLineDash([3, 3]);
+        if (shape.strokeStyle === "dashed") this.ctx.setLineDash([6, 6]);
+        this.ctx.lineWidth = shape.strokeWidth;
         this.ctx.moveTo(shape.x1, shape.y1);
         this.ctx.lineTo(shape.x2, shape.y2);
         this.ctx.stroke();
@@ -1132,6 +1165,11 @@ export class Game {
           fontFamily: this.fontFamily,
           color: this.strokeColor,
         };
+
+        const shapeObj: AllShapes = { shape: textShape };
+        this.existingShapes.push(shapeObj);
+        this.saveState();
+
         this.socket.send(
           JSON.stringify({
             type: "shapes",
@@ -1145,7 +1183,7 @@ export class Game {
     }
     this.isEditingText = false;
     this.pendingTextShape = null;
-    this.clearCanvas(); // Redraw canvas to remove placeholder/ensure consistency
+    this.clearCanvas();
   }
 
   clearCanvas() {
@@ -1176,7 +1214,13 @@ export class Game {
     }
     // Draw current pencil stroke (if any)
     if (this.isDrawing && this.selectedTool === "pencil") {
-      this.drawShape({ type: "pencil", points: this.currentPencilStroke });
+      this.drawShape({
+        type: "pencil",
+        points: this.currentPencilStroke,
+        strokeColor: this.strokeColor,
+        strokeStyle: this.strokeStyle,
+        strokeWidth: this.strokeWidth,
+      });
     }
 
     this.ctx.restore();
@@ -1246,13 +1290,6 @@ export class Game {
             height + 4 / this.scale
           );
         }
-      } else if (element.shape.type === "circle") {
-        this.ctx.strokeRect(
-          element.shape.x - element.shape.radius - 2 / this.scale,
-          element.shape.y - element.shape.radius - 2 / this.scale,
-          element.shape.radius * 2 + 4 / this.scale,
-          element.shape.radius * 2 + 4 / this.scale
-        );
       } else if (
         element.shape.type === "line" ||
         element.shape.type === "arrow"
@@ -1304,13 +1341,6 @@ export class Game {
         y: shape.y,
         width: shape.width,
         height: shape.height,
-      };
-    } else if (shape.type === "circle") {
-      bounds = {
-        x: shape.x - shape.radius,
-        y: shape.y - shape.radius,
-        width: shape.radius * 2,
-        height: shape.radius * 2,
       };
     } else if (shape.type === "pencil") {
       bounds = this.getPathBounds(shape.points);

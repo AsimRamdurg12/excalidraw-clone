@@ -3,17 +3,20 @@ import RoomCanvas from "./components/Canvas/RoomCanvas";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import AuthContextProvider from "./context/AuthContextProvider";
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/user/authenticate" element={<Auth />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/room/:id" element={<RoomCanvas />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthContextProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/user/authenticate" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/room/:id" element={<RoomCanvas />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthContextProvider>
   );
 };
 

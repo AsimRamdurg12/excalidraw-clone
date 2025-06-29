@@ -18,10 +18,13 @@ const Benefits = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {benefits.map((benefit) => {
+          {benefits.map((benefit, index) => {
             const IconComponent = benefit.icon;
             return (
-              <div className="p-4 text-center rounded group space-y-2">
+              <div
+                className="p-4 text-center rounded group space-y-2"
+                key={index}
+              >
                 <div className="relative mb-6 space-y-2">
                   <div className="flex justify-center transform transition-all duration-300 hover:scale-110 items-center mx-auto size-20 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600">
                     <IconComponent className="size-10 text-white" />
