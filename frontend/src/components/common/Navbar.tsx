@@ -4,8 +4,8 @@ import { IoMenu } from "react-icons/io5";
 
 const Navbar = () => {
   return (
-    <nav className="fixed min-w-screen bg-white z-1 h-16 border-b">
-      <div className="flex justify-between items-center px-6 py-2 max-w-7xl mx-auto">
+    <nav className="fixed min-w-screen bg-white z-1 border-b">
+      <div className="flex justify-between items-center px-6 py-2">
         <div className="p-1 rounded-lg bg-blue-600">
           <PiPenNib size={30} className="text-white" />
         </div>

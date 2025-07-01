@@ -10,7 +10,7 @@ const Button = React.forwardRef<
       ref={ref}
       {...props}
       className={cn(
-        "py-2 px-4 rounded-md bg-blue-600 text-white font-semibold",
+        "py-2 px-4 rounded-md bg-blue-600 text-white font-semibold cursor-pointer",
         className
       )}
     ></button>

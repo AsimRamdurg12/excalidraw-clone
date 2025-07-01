@@ -1,42 +1,32 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
 import { api } from "../lib/axios";
 import type { AxiosError } from "axios";
-
-interface Profile {
-  name: string;
-  photo?: string;
-  email: string;
-}
+import { useQuery } from "@tanstack/react-query";
 
 const useProfile = () => {
-  const [profile, setProfile] = useState<Profile>();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<AxiosError<unknown, any>>();
-
-  useEffect(() => {
-    const getProfile = async () => {
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
       try {
-        setLoading(true);
-        const response = await api.get("/auth/get");
-
-        if (!response.data || !response.data.success) {
-          throw new Error(response.data.message);
-        }
+        const response = await api.get("/auth/get-user");
         const result = await response.data;
-        setProfile(result.message);
+
+        if (!result.ok) throw new Error(response.data.message);
 
         return result;
       } catch (error) {
         const axiosError = error as AxiosError;
-        setError(axiosError);
-      } finally {
-        setLoading(false);
+        throw new Error(axiosError.message);
       }
-    };
-    getProfile();
-  }, [profile]);
-  return { profile, error, loading };
+    },
+    retry: false,
+    retryOnMount: false,
+  });
+
+  return { user, isLoading, isError };
 };
 
 export default useProfile;

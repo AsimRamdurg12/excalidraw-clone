@@ -3,11 +3,12 @@ import RoomCanvas from "./components/Canvas/RoomCanvas";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import AuthContextProvider from "./context/AuthContextProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+const queryClient = new QueryClient();
 const App = () => {
   return (
-    <AuthContextProvider>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -16,7 +17,7 @@ const App = () => {
           <Route path="/room/:id" element={<RoomCanvas />} />
         </Routes>
       </BrowserRouter>
-    </AuthContextProvider>
+    </QueryClientProvider>
   );
 };
 

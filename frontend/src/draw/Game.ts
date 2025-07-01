@@ -181,7 +181,7 @@ export class Game {
         };
         break;
       case "eraser":
-        // Eraser logic on mouse down (if any)
+        // Eraser logic on mous  e down (if any)
         break;
       case "hand":
         this.isPanning = true;

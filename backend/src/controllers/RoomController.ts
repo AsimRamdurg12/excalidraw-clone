@@ -13,20 +13,6 @@ export const createRoom = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!user) {
-      res.status(403).json({
-        success: false,
-        message: "User not authenticated. Please login first",
-      });
-      return;
-    }
-
     const existingRoom = await prisma.room.findUnique({
       where: {
         slug: data.data?.slug,
@@ -65,20 +51,6 @@ export const getRooms = async (req: Request, res: Response) => {
   try {
     const id = req.id;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!user) {
-      res.status(401).json({
-        success: false,
-        message: "Please login to join the room",
-      });
-      return;
-    }
-
     const rooms = await prisma.room.findMany({
       where: {
         adminId: id,
@@ -113,20 +85,6 @@ export const getRoomBySlug = async (req: Request, res: Response) => {
     const id = req.id;
     const slug = req.params.slug;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!user) {
-      res.status(401).json({
-        success: false,
-        message: "Please login to join the room",
-      });
-      return;
-    }
-
     const room = await prisma.room.findFirst({
       where: {
         adminId: id,
@@ -159,21 +117,6 @@ export const deleteRoom = async (req: Request, res: Response) => {
   try {
     const id = req.id;
     const slug = req.params.slug;
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!user) {
-      res.status(403).json({
-        success: false,
-        message:
-          "You are unauthorized to delete this room. Please login with correct credentials",
-      });
-      return;
-    }
 
     const room = await prisma.room.findFirst({
       where: {
