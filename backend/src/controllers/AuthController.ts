@@ -9,7 +9,7 @@ export const signUp = async (req: Request, res: Response) => {
     const data = CreateUserSchema.safeParse(req.body);
 
     if (!data.success) {
-      res.json({
+      res.status(400).json({
         message: data.error,
       });
     }
@@ -57,7 +57,7 @@ export const signIn = async (req: Request, res: Response) => {
     const data = signInSchema.safeParse(req.body);
 
     if (!data.success) {
-      res.json({
+      res.status(400).json({
         message: data.error,
       });
     }

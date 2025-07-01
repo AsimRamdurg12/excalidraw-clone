@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "../ui/Button";
-import SignUpForm from "../components/forms/SignUpForm";
-import SignInForm from "../components/forms/SignInForm";
+import SignUpForm from "../components/auth/signup/SignUpForm";
+import SignInForm from "../components/auth/signin/SignInForm";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
