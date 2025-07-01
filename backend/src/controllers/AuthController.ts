@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { CreateUserSchema, signInSchema } from "../Schemas/UserSchema";
 import { prisma } from "../utils/prisma";
+import { resolveSoa } from "dns";
+import { sendResetEmail } from "../utils/resend";
 
 export const signUp = async (req: Request, res: Response) => {
   try {
@@ -108,6 +110,145 @@ export const signIn = async (req: Request, res: Response) => {
       message: `Error in signIn: ${error}`,
     });
     return;
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User to found. Enter a valid email.",
+      });
+      return;
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const resetToken = await bcrypt.hash(otp, 5);
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        resetToken: resetToken,
+        tokenExpiresAt: Date.now() + 5 * 60 * 1000,
+      },
+    });
+
+    sendResetEmail(email, otp);
+
+    res.status(201).json({
+      success: true,
+      message: "OTP has been sent to your mail.",
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Error in forgotPassword: ${error}`,
+    });
+    return;
+  }
+};
+
+export const verifyOTP = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    if (user?.tokenExpiresAt! < Date.now()) {
+      res.status(403).json({
+        success: false,
+        message: "OTP expired. Generate a new one.",
+      });
+      return;
+    }
+
+    const verify = bcrypt.compare(user?.resetToken!, otp);
+
+    if (!verify) {
+      res.status(401).json({
+        success: false,
+        message: "OTP doesn't match",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified",
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Error in verifyOTP: ${error}`,
+    });
+    return;
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    const updateHashPassword = await bcrypt.hash(password, 10);
+
+    await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        password: updateHashPassword,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Error in updatePassword: ${error}`,
+    });
   }
 };
 
