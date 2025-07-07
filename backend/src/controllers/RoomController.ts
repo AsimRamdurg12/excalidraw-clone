@@ -28,7 +28,7 @@ export const createRoom = async (req: Request, res: Response) => {
 
     const room = await prisma.room.create({
       data: {
-        adminId: id?.toString()!,
+        adminId: id!,
         slug: data.data?.slug!,
       },
     });

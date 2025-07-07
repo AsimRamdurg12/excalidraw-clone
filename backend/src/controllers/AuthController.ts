@@ -140,7 +140,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       },
       data: {
         resetToken: resetToken,
-        tokenExpiresAt: Date.now() + 5 * 60 * 1000,
+        tokenExpiresAt: (Date.now() + 5 * 60 * 1000).toString(),
       },
     });
 
@@ -178,7 +178,7 @@ export const verifyOTP = async (req: Request, res: Response) => {
       return;
     }
 
-    if (user?.tokenExpiresAt! < Date.now()) {
+    if (user?.tokenExpiresAt! < Date.now().toString()) {
       res.status(403).json({
         success: false,
         message: "OTP expired. Generate a new one.",
@@ -255,7 +255,7 @@ export const getProfile = async (req: Request, res: Response) => {
   try {
     const id = req.id;
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
         id: id,
       },

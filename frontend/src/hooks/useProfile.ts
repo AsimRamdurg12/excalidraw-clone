@@ -14,7 +14,7 @@ const useProfile = () => {
         const response = await api.get("/auth/get-user");
         const result = await response.data;
 
-        if (!result.ok) throw new Error(response.data.message);
+        if (!result.success) throw new Error(response.data.message);
 
         return result;
       } catch (error) {
