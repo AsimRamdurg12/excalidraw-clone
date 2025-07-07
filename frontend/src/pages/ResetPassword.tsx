@@ -7,6 +7,7 @@ import { useSendResetEmail } from "../hooks/auth/useSendResetEmail";
 import { useVerifyOtp } from "../hooks/auth/useVerifyOtp";
 import { useResetPassword } from "../hooks/auth/useResetPassword";
 import { CgMail } from "react-icons/cg";
+import { useNavigate } from "react-router-dom";
 
 const ResetPassword = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,7 @@ const ResetPassword = () => {
   const sendEmailMutation = useSendResetEmail(() => setIsEmailSent(true));
   const verifyOtpMutation = useVerifyOtp(email, () => setIsOtpSubmitted(true));
   const resetPasswordMutation = useResetPassword(email);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-blue-200">
@@ -35,6 +37,7 @@ const ResetPassword = () => {
           <h2 className="font-semibold text-3xl">Reset Password</h2>
           <p>Enter your registered email</p>
           <Input
+            type="email"
             placeholder="Email"
             Icon={<CgMail size={25} />}
             onChange={(e) => setEmail(e.target.value)}
@@ -77,6 +80,7 @@ const ResetPassword = () => {
           onSubmit={(e: FormEvent) => {
             e.preventDefault();
             resetPasswordMutation.mutate(newPassword);
+            navigate("/user/authenticate");
           }}
           className="border p-4 rounded-lg flex flex-col justify-center gap-2 w-96 bg-neutral-900 text-white"
         >

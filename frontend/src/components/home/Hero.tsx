@@ -3,8 +3,13 @@ import Button from "../../ui/Button";
 import { BsArrowRight } from "react-icons/bs";
 import { FaUsers } from "react-icons/fa";
 import { FiZap } from "react-icons/fi";
+import useProfile from "../../hooks/useProfile";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const { user } = useProfile();
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-blue-200 via-white to-purple-200">
       <div className="pt-20 pb-20 text-center">
@@ -31,7 +36,13 @@ const Hero = () => {
             freedom of unlimited space.
           </p>
 
-          <Button className="group flex items-center gap-2 text-xl px-8 py-4 rounded-xl transition-all transform duration-300 hover:scale-105 hover:shadow-xl font-semibold shadow-md">
+          <Button
+            onClick={() => {
+              if (user) navigate("/dashboard");
+              else navigate("/user/authenticate");
+            }}
+            className="group flex items-center gap-2 text-xl px-8 py-4 rounded-xl transition-all transform duration-300 hover:scale-105 hover:shadow-xl font-semibold shadow-md"
+          >
             Start Creating for Free
             <BsArrowRight className="group-hover:translate-x-1 transition-transform" />
           </Button>

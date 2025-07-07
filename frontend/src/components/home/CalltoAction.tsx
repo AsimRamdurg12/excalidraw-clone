@@ -1,7 +1,12 @@
 import { BsArrowRight, BsPlayBtn } from "react-icons/bs";
 import Button from "../../ui/Button";
+import { useNavigate } from "react-router-dom";
+import useProfile from "../../hooks/useProfile";
 
 const CalltoAction = () => {
+  const { user } = useProfile();
+  const navigate = useNavigate();
+
   return (
     <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600">
       <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
@@ -17,7 +22,13 @@ const CalltoAction = () => {
         </div>
 
         <div className="flex items-center max-sm:flex-col justify-center my-5 gap-4 w-full">
-          <Button className="group bg-white text-blue-600 flex items-center justify-center gap-2 font-bold text-xl py-4 px-8 transform transition-all duration-300 hover:scale-105">
+          <Button
+            onClick={() => {
+              if (user) navigate("/dashboard");
+              else navigate("/user/authenticate");
+            }}
+            className="group bg-white text-blue-600 flex items-center justify-center gap-2 font-bold text-xl py-4 px-8 transform transition-all duration-300 hover:scale-105"
+          >
             {" "}
             Start Creating Now - It's Free
             <BsArrowRight />

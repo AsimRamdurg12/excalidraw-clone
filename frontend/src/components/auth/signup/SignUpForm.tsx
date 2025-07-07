@@ -19,7 +19,7 @@ const SignUpForm = () => {
 
   return (
     <form
-      className="flex flex-col bg-white w-full py-8 gap-2"
+      className="flex flex-col w-full py-8 gap-2"
       onSubmit={handleSubmit((data) => mutate(data))}
     >
       {serverError && (

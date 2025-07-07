@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendResetEmail = async (email: string, OTP: string) => {
   return await resend.emails.send({
-    from: "YourApp <noreply@yourdomain.com>",
+    from: "DrawingBoard <website@resend.dev>",
     to: email,
     subject: "Reset Your Password",
     html: resetPasswordTemplate(OTP),

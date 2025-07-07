@@ -1,7 +1,12 @@
+import { useNavigate } from "react-router-dom";
+import useProfile from "../../hooks/useProfile";
 import { useCases } from "../../lib/constants";
 import Button from "../../ui/Button";
 
 const UseCases = () => {
+  const { user } = useProfile();
+  const navigate = useNavigate();
+
   return (
     <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -44,7 +49,13 @@ const UseCases = () => {
           <p className="text-xl text-gray-700">
             Ready to explore what's possible with visual thinking?
           </p>
-          <Button className="rounded-lg text-lg bg-gradient-to-br px-8 py-4 from-blue-600 to-purple-600 transform transition-all duration-300 hover:scale-105">
+          <Button
+            onClick={() => {
+              if (user) navigate("/dashboard");
+              else navigate("/user/authenticate");
+            }}
+            className="rounded-lg text-lg bg-gradient-to-br px-8 py-4 from-blue-600 to-purple-600 transform transition-all duration-300 hover:scale-105"
+          >
             Start Your First Board
           </Button>
         </div>

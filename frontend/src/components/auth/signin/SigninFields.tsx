@@ -25,6 +25,12 @@ const SigninFields = ({ register, errors }: Props) => (
       {...register("password")}
       placeholder="Enter your password"
     />
+    <a
+      href="/reset-password"
+      className="flex justify-end w-fit text-xs underline text-gray-500 hover:text-gray-300 font-medium"
+    >
+      forgot password?
+    </a>
     {errors.password && (
       <p className="text-red-500 text-xs">{errors.password.message}</p>
     )}

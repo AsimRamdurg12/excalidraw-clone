@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { CreateUserSchema, signInSchema } from "../Schemas/UserSchema";
 import { prisma } from "../utils/prisma";
-import { resolveSoa } from "dns";
 import { sendResetEmail } from "../utils/resend";
 
 export const signUp = async (req: Request, res: Response) => {
@@ -145,7 +144,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       },
     });
 
-    sendResetEmail(email, otp);
+    await sendResetEmail(email, otp);
 
     res.status(201).json({
       success: true,
