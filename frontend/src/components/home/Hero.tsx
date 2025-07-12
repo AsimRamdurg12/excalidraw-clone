@@ -38,9 +38,7 @@ const Hero = () => {
 
           <Button
             onClick={() =>
-              user.success
-                ? navigate("/dashboard")
-                : navigate("/user/authenticate")
+              user ? navigate("/dashboard") : navigate("/user/authenticate")
             }
             className="group flex items-center gap-2 text-xl px-8 py-4 rounded-xl transition-all transform duration-300 hover:scale-105 hover:shadow-xl font-semibold shadow-md"
           >

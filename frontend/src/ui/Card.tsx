@@ -3,13 +3,7 @@ import Button from "./Button";
 import { images } from "../lib/constants";
 import type { Room } from "../pages/Room";
 
-type Card = {
-  room: Room;
-  isChatOpen: boolean;
-  setIsChatOpen: (s: boolean) => void;
-};
-
-const Card = ({ room, isChatOpen, setIsChatOpen }: Card) => {
+const Card = ({ room }: { room: Room }) => {
   const navigate = useNavigate();
 
   const n = Math.floor(Math.random() * images.length);
@@ -26,7 +20,7 @@ const Card = ({ room, isChatOpen, setIsChatOpen }: Card) => {
         <div className="flex gap-2 my-2">
           <Button
             className="w-full bg-black"
-            onClick={() => setIsChatOpen(!isChatOpen)}
+            onClick={() => navigate(`/room/chat/${room.id}`)}
           >
             Chat
           </Button>

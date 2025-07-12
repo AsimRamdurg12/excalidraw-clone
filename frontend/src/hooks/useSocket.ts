@@ -18,10 +18,14 @@ export const useSocket = (roomId: string) => {
       ws.send(data);
     };
 
+    ws.onerror = (error) => {
+      console.error(error);
+    };
+
     return () => {
       ws.onclose = () => {
         const data = JSON.stringify({
-          type: "join-room",
+          type: "leave-room",
           roomId,
         });
 

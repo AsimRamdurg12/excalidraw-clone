@@ -17,7 +17,6 @@ const Room = () => {
   const queryClient = useQueryClient();
 
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [newRoom, setNewRoom] = useState(false);
   const [slug, setSlug] = useState("");
 
@@ -116,12 +115,7 @@ const Room = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 p-4 gap-4">
           {rooms.map((room: Room) => (
-            <Card
-              key={room.id}
-              room={room}
-              isChatOpen={isChatOpen}
-              setIsChatOpen={setIsChatOpen}
-            />
+            <Card key={room.id} room={room} />
           ))}
         </div>
       )}

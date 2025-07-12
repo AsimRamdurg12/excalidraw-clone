@@ -24,9 +24,6 @@ export const getChats = async (req: Request, res: Response) => {
       where: {
         roomId: room.id,
       },
-      orderBy: {
-        id: "desc",
-      },
       take: 1000,
     });
 

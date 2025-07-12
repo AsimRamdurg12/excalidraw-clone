@@ -2,6 +2,7 @@ import express from "express";
 import {
   forgotPassword,
   getProfile,
+  logout,
   resetPassword,
   signIn,
   signUp,
@@ -13,9 +14,10 @@ const router = express.Router();
 
 router.post("/sign-up", signUp);
 router.post("/sign-in", signIn);
-router.post("/send-email", forgotPassword);
+router.put("/send-email", forgotPassword);
 router.post("/verify-otp", verifyOTP);
-router.post("/reset-password", resetPassword);
+router.patch("/reset-password", resetPassword);
 router.get("/get-user", authMiddleWare, getProfile);
+router.post("/logout", logout);
 
 export default router;
