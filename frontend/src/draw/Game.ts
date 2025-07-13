@@ -257,9 +257,6 @@ export class Game {
   };
 
   private keyDownHandler = (e: KeyboardEvent) => {
-    if (e.key === "Backspace" || e.key === "Delete") {
-      // Implement delete functionality for selected items
-    }
     if (e.ctrlKey && e.key === "z") {
       this.undo();
     }
@@ -336,7 +333,6 @@ export class Game {
     }
   }
 
-  // A new method to update shapes during drawing
   private updateDrawingShape(pos: { x: number; y: number }) {
     if (!this.activeShape) return;
     const { shape } = this.activeShape;
@@ -349,7 +345,6 @@ export class Game {
         shape.height = dy;
         break;
       case "ellipse":
-        // FIX: Corrected ellipse drawing to use bounding box logic
         shape.x = Math.min(this.startX, pos.x);
         shape.y = Math.min(this.startY, pos.y);
         shape.width = Math.abs(dx);
@@ -419,14 +414,12 @@ export class Game {
       const message = JSON.parse(event.data);
       if (message.type === "shapes") {
         this.existingShapes.push(message.message);
-        console.log(this.existingShapes);
 
         this.saveState();
         this.clearCanvas();
       }
       if (message.type === "update") {
         const updatedShapeData = message.message;
-        console.log(updatedShapeData);
 
         this.existingShapes = this.existingShapes.map((s) =>
           s.id === updatedShapeData.id ? updatedShapeData : s
@@ -437,7 +430,6 @@ export class Game {
     };
   }
 
-  // --- State and Drawing ---
   saveState() {
     // Deep clone the current state
     const currentState = JSON.parse(JSON.stringify(this.existingShapes));
@@ -961,7 +953,8 @@ export class Game {
         if (shape.strokeStyle === "dotted") this.ctx.setLineDash([3, 3]);
         if (shape.strokeStyle === "dashed") this.ctx.setLineDash([6, 6]);
         this.ctx.rect(shape.x, shape.y, shape.width, shape.height);
-        if (shape.fillColor === "") this.ctx.fillStyle = "transparent";
+        if (shape.fillColor === "transparent")
+          this.ctx.fillStyle = "transparent";
         else this.ctx.fillStyle = shape.fillColor;
         this.ctx.fill();
         this.ctx.stroke();

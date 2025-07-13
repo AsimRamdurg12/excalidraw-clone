@@ -1,4 +1,9 @@
-import { colors, strokeStyle, strokeWidth } from "../../lib/constants";
+import {
+  backgroundColors,
+  colors,
+  strokeStyle,
+  strokeWidth,
+} from "../../lib/constants";
 import type { Style } from "./Canvas";
 
 interface ColorPicker {
@@ -42,7 +47,7 @@ const Palette = ({
         <div className="space-y-2">
           <h5 className="text-sm font-semibold">Background</h5>
           <div className="flex gap-2">
-            {colors.slice(1).map((c) => (
+            {backgroundColors.map((c) => (
               <div
                 key={c.color}
                 className={`${c.color} size-6 rounded ${

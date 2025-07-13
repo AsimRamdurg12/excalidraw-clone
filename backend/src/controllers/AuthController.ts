@@ -5,6 +5,8 @@ import { CreateUserSchema, signInSchema } from "../Schemas/UserSchema";
 import { prisma } from "../utils/prisma";
 import { sendResetEmail } from "../utils/resend";
 
+const JWT_SECRET = process.env.JWT_SECRET || "Asim_123";
+
 export const signUp = async (req: Request, res: Response) => {
   try {
     const data = CreateUserSchema.safeParse(req.body);
@@ -90,7 +92,7 @@ export const signIn = async (req: Request, res: Response) => {
       return;
     }
 
-    const token = jwt.sign(user.id, process.env.JWT_SECRET as string);
+    const token = jwt.sign(user.id, JWT_SECRET);
 
     res.cookie("jwt", token, {
       maxAge: 15 * 24 * 60 * 60 * 1000,

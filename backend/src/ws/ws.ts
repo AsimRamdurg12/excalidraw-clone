@@ -6,12 +6,11 @@ import { prisma } from "../utils/prisma";
 interface User {
   ws: WebSocket;
   id: string;
-  rooms: string[];
+  rooms: number[];
 }
 
 const users: User[] = [];
 
-// Helper function to safely send messages
 const safeSend = (ws: WebSocket, data: string) => {
   if (ws.readyState === WebSocket.OPEN) {
     try {
@@ -22,7 +21,6 @@ const safeSend = (ws: WebSocket, data: string) => {
   }
 };
 
-// Helper function to remove user from users array
 const removeUser = (ws: WebSocket) => {
   const index = users.findIndex((user) => user.ws === ws);
   if (index !== -1) {
@@ -32,17 +30,12 @@ const removeUser = (ws: WebSocket) => {
 };
 
 const WebSocketSetup = (server: Server) => {
-  const wss = new WebSocketServer({ server: server });
+  const wss = new WebSocketServer({ server });
 
   wss.on("connection", (ws, request) => {
     let userId: string | null = null;
 
     try {
-      ws.on("error", (error) => {
-        console.error("WebSocket error:", error);
-        removeUser(ws);
-      });
-
       const url = request.url;
       if (!url) {
         ws.close();
@@ -53,65 +46,63 @@ const WebSocketSetup = (server: Server) => {
       const token = queryParams.get("token");
       const id = checkUser(token!);
 
-      if (id === null) {
+      if (!id) {
         ws.close();
         return;
       }
 
       userId = id;
-
-      users.push({
-        id,
-        rooms: [],
-        ws,
-      });
-
+      users.push({ id, rooms: [], ws });
       console.log(`User connected. Total users: ${users.length}`);
 
       ws.on("message", async (data) => {
         try {
-          let parsedData = JSON.parse(data.toString());
+          const parsedData = JSON.parse(data.toString());
 
           if (parsedData.type === "join-room") {
-            const user = users.find((x) => x.ws === ws);
-            if (user && !user.rooms.includes(parsedData.roomId)) {
-              user.rooms.push(parsedData.roomId);
-              console.log(`User ${user.id} joined room ${parsedData.roomId}`);
+            const roomId = Number(parsedData.roomId);
+            const user = users.find((u) => u.ws === ws);
+            if (user && !user.rooms.includes(roomId)) {
+              user.rooms.push(roomId);
+              console.log(`User ${user.id} joined room ${roomId}`);
             }
           }
 
           if (parsedData.type === "leave-room") {
-            const user = users.find((x) => x.ws === ws);
+            const roomId = Number(parsedData.roomId);
+            const user = users.find((u) => u.ws === ws);
             if (user) {
-              user.rooms = user.rooms.filter((x) => x !== parsedData.roomId);
-              console.log(`User ${user.id} left room ${parsedData.roomId}`);
+              user.rooms = user.rooms.filter((r) => r !== roomId);
+              console.log(`User ${user.id} left room ${roomId}`);
             }
           }
 
           if (parsedData.type === "chat") {
-            const roomId = parsedData.roomId;
+            const roomId = Number(parsedData.roomId);
             const message = parsedData.message;
 
-            await prisma.chat.create({
+            const savedChat = await prisma.chat.create({
               data: {
-                roomId: Number(roomId),
+                roomId,
                 message,
                 userId: id,
               },
             });
 
-            // Broadcast to all users in the room (including sender)
+            const chatPayload = {
+              type: "chat",
+              message: {
+                id: savedChat.id,
+                message: savedChat.message,
+                userId: savedChat.userId,
+                roomId: savedChat.roomId,
+                createdAt: savedChat.createdAt,
+              },
+            };
+
             users.forEach((user) => {
               if (user.rooms.includes(roomId)) {
-                safeSend(
-                  user.ws,
-                  JSON.stringify({
-                    type: "chat",
-                    message: message,
-                    roomId,
-                    userId: id, // Include sender info
-                  })
-                );
+                safeSend(user.ws, JSON.stringify(chatPayload));
               }
             });
           }
@@ -173,7 +164,7 @@ const WebSocketSetup = (server: Server) => {
             });
           }
         } catch (error) {
-          console.error(`Error processing message from user ${userId}:`, error);
+          console.error(`Message error from ${userId}:`, error);
         }
       });
 
@@ -181,11 +172,14 @@ const WebSocketSetup = (server: Server) => {
         console.log(`Client ${userId} disconnected`);
         removeUser(ws);
       });
-    } catch (error) {
-      console.error("Error in connection setup:", error);
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
-      }
+
+      ws.on("error", (err) => {
+        console.error("WebSocket error:", err);
+        removeUser(ws);
+      });
+    } catch (err) {
+      console.error("Connection error:", err);
+      ws.close();
     }
   });
 };

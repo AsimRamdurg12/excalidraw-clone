@@ -246,6 +246,28 @@ export const colors = [
     hex: "#FF6F00",
   },
 ];
+export const backgroundColors = [
+  {
+    color: "transparent",
+    hex: "transparent",
+  },
+  {
+    color: "bg-red-500",
+    hex: "#FF0000",
+  },
+  {
+    color: "bg-green-500",
+    hex: "#00FF00",
+  },
+  {
+    color: "bg-blue-500",
+    hex: "#0000FF",
+  },
+  {
+    color: "bg-orange-500",
+    hex: "#FF6F00",
+  },
+];
 
 export const strokeStyle = [
   {

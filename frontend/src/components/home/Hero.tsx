@@ -10,6 +10,8 @@ const Hero = () => {
   const { user } = useProfile();
   const navigate = useNavigate();
 
+  console.log(user);
+
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-blue-200 via-white to-purple-200">
       <div className="pt-20 pb-20 text-center">
@@ -38,7 +40,9 @@ const Hero = () => {
 
           <Button
             onClick={() =>
-              user ? navigate("/dashboard") : navigate("/user/authenticate")
+              user?.success
+                ? navigate("/dashboard")
+                : navigate("/user/authenticate")
             }
             className="group flex items-center gap-2 text-xl px-8 py-4 rounded-xl transition-all transform duration-300 hover:scale-105 hover:shadow-xl font-semibold shadow-md"
           >
