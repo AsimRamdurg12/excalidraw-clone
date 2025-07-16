@@ -202,6 +202,7 @@ export class Game {
     } else if (this.selectedTool === "select") {
       this.handleSelectMouseMove(pos);
     } else if (this.isDrawing && this.activeShape) {
+      this.clearCanvas();
       this.updateDrawingShape(pos);
     } else if (this.isDrawing && this.selectedTool === "pencil") {
       this.currentPencilStroke.push({ x: pos.x, y: pos.y });
@@ -703,7 +704,6 @@ export class Game {
 
     const clickedElement = this.getElementAtPosition(pos);
     if (clickedElement) {
-      console.log(clickedElement);
       this.selectedElements = [clickedElement];
       this.isMoving = true;
       this.dragX = pos.x;

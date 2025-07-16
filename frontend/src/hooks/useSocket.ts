@@ -8,9 +8,7 @@ export const useSocket = (roomId: string) => {
     const ws = new WebSocket(`ws://localhost:3001?token=${token}`);
 
     ws.onopen = () => {
-      console.log("✅ WebSocket connected");
       setSocket(ws);
-
       ws.send(
         JSON.stringify({
           type: "join-room",
@@ -18,11 +16,6 @@ export const useSocket = (roomId: string) => {
         })
       );
     };
-
-    ws.onerror = (error) => {
-      console.error("❌ WebSocket error:", error);
-    };
-
     return () => {
       try {
         ws.send(

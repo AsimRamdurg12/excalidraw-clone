@@ -108,7 +108,7 @@ const WebSocketSetup = (server: Server) => {
           }
 
           if (parsedData.type === "shapes") {
-            const roomId = parsedData.roomId;
+            const roomId = Number(parsedData.roomId);
             const message = parsedData.message;
 
             const shapeMessage = await prisma.shapes.create({
@@ -148,7 +148,6 @@ const WebSocketSetup = (server: Server) => {
               },
             });
 
-            // Broadcast to all users in the room (including sender)
             users.forEach((user) => {
               if (user.rooms.includes(roomId)) {
                 safeSend(
